@@ -5,4 +5,7 @@ avl.txt
 graficoAdicao.py
 rubro_negra.txt
 .gitignore
-.vscode
+/.vscode
+a.out
+AB_WR.c
+ARB
