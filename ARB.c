@@ -31,13 +31,11 @@ void inserir(Arvore* arvore, int valor);
 void exibir_pre_order(No* no);
 void random_num(int numeros[], int tam);
 int altura(No* no);
+No* encontrar_no(No* no, int valor);
 
-/*
-void remover_valor(Arvore* arvore, int valor);
-void remover(Arvore* arvore, No* no);
-void transplantar(Arvore* arvore, No* no_alvo, No* no_substituto);
-No* encontrar_minimo(Arvore *arvore, No* no);
-*/
+void remover(Arvore* arvore, int valor);
+No* encontrar_minimo(No* no);
+void transplant(Arvore* arvore, No* u, No* v);
 
 int main(int argc, char *argv[]) {
     srand(time(NULL));
@@ -51,8 +49,19 @@ int main(int argc, char *argv[]) {
     Arvore arvore;
     inicializar_arvore(&arvore);
 
+    /*
     for (int i = 0; i < ARVORE_QUANT + 1; i++)
         inserir(&arvore, numeros[i]);
+    */
+
+    inserir(&arvore, 10);
+    inserir(&arvore, 5);
+    inserir(&arvore, 30);
+    inserir(&arvore, 2);
+    inserir(&arvore, 9);
+    inserir(&arvore, 25);
+    inserir(&arvore, 40);
+    inserir(&arvore, 38);
 
     printf("Arvore rubro-negra com %d elementos:\n", ARVORE_QUANT);
     exibir_pre_order(arvore.raiz);
@@ -61,88 +70,101 @@ int main(int argc, char *argv[]) {
     /*
     random_num(numeros, ARVORE_QUANT); // randomiza o array de valores
     for (int i = 0; i < ARVORE_QUANT + 1; i++) {
-        remover_valor(&arvore, numeros[i]);
+       remover(&arvore, numeros[i]);
     }
+    */
+
+    remover(&arvore, 30);
 
     printf("Arvore rubro-negra apos remocao:\n");
     exibir_pre_order(arvore.raiz);
     printf("\nAltura: %d\n", altura(arvore.raiz));
-    */
 
     return 0;
 }
 
-/*
-No* encontrar_minimo(Arvore *arvore, No* no) {
-    while (no->esquerda != NULL && no->esquerda != arvore->nulo)
+No* encontrar_no(No* no, int valor) {
+    if (no != NULL) {
+        if (no->valor == valor)
+            return no;
+        
+        if (valor < no->valor)
+            return encontrar_no(no->esquerda, valor);
+        else
+            return encontrar_no(no->direita, valor);
+    }
+
+    return NULL;
+}
+
+void remover(Arvore* arvore, int valor) {
+    No* z = encontrar_no(arvore->raiz, valor);
+    No* y = z;
+    No* x;
+    Cor cor_original;
+
+    if (z == NULL) {
+        printf("Valor %d nao encontrado na arvore.\n", valor);
+        return;
+    }
+
+    if (z->esquerda == arvore->nulo) {
+        x = z->direita;
+        cor_original = y->cor;
+        transplant(arvore, z, z->direita);
+    } 
+    else if (z->direita == arvore->nulo) {
+        x = z->esquerda;
+        cor_original = y->cor;
+        transplant(arvore, z, z->esquerda);
+    } 
+    else {
+        y = encontrar_minimo(z->direita);
+        cor_original = y->cor;
+        x = y->direita;
+
+        if (y->pai == z)
+            x->pai = y;
+        else {
+            transplant(arvore, y, y->direita);
+            y->direita = z->direita;
+            y->direita->pai = y;
+        }
+
+        transplant(arvore, z, y);
+        y->esquerda = z->esquerda;
+        y->esquerda->pai = y;
+        y->cor = z->cor;
+    }
+
+    free(z);
+
+    if (cor_original == Preto)
+        balancear(arvore, x);
+}
+
+No* encontrar_minimo(No* no) {
+    while (no->esquerda)
         no = no->esquerda;
     return no;
 }
 
-void transplantar(Arvore* arvore, No* no_alvo, No* no_substituto) {
-    if (no_alvo->pai == arvore->nulo)
-        arvore->raiz = no_substituto;
-    else if (no_alvo == no_alvo->pai->esquerda)
-        no_alvo->pai->esquerda = no_substituto;
+void transplant(Arvore* arvore, No* u, No* v) {
+    if (!u->pai)
+        arvore->raiz = v;
+    else if (u == u->pai->esquerda)
+        u->pai->esquerda = v;
     else
-        no_alvo->pai->direita = no_substituto;
-
-    no_substituto->pai = no_alvo->pai;
+        u->pai->direita = v;
+    
+    if (v)
+        v->pai = u->pai;
 }
-
-void remover(Arvore* arvore, No* no) {
-    No* y = no;
-    No* x;
-    Cor cor_original_y = y->cor;
-
-    if (no->esquerda == arvore->nulo) {
-        x = no->direita;
-        transplantar(arvore, no, no->direita);
-    } else if (no->direita == arvore->nulo) {
-        x = no->esquerda;
-        transplantar(arvore, no, no->esquerda);
-    } else {
-        y = encontrar_minimo(arvore, no->direita);
-        cor_original_y = y->cor;
-        x = y->direita;
-
-        if (y->pai != no) {
-            transplantar(arvore, y, y->direita);
-            y->direita = no->direita;
-            y->direita->pai = y;
-        }
-
-        transplantar(arvore, no, y);
-        y->esquerda = no->esquerda;
-        y->esquerda->pai = y;
-        y->cor = no->cor;
-    }
-
-    if (cor_original_y == Preto)
-        balancear(arvore, x);
-
-    free(no);
-}
-
-void remover_valor(Arvore* arvore, int valor) {
-    No* no = arvore->raiz;
-
-    while (no != arvore->nulo) {
-        if (valor == no->valor) {
-            remover(arvore, no);
-            return;
-        } else if (valor < no->valor) {
-            no = no->esquerda;
-        } else {
-            no = no->direita;
-        }
-    }
-
-    printf("Valor %d não encontrado na árvore.\n", valor);
-}
-*/
 
 int altura(No* no){
+    if (no == NULL)
+        return 0;
+    
     int esquerda = 0,direita = 0;
 
     if (no->esquerda != NULL)
@@ -214,10 +236,10 @@ void inserir(Arvore* arvore, int valor) {
 }
 
 void balancear(Arvore* arvore, No* no) {
-    while (no->pai->cor == Vermelho) { // garante o balanceamento de todos os níveis
+    while (no != arvore->raiz && no->pai != NULL && no->pai->cor == Vermelho) {
         if (no->pai == no->pai->pai->esquerda) {
             No *tio = no->pai->pai->direita;
-            if (tio->cor == Vermelho) {
+            if (tio != NULL && tio->cor == Vermelho) {
                 tio->cor = Preto; // caso 2
                 no->pai->cor = Preto;
                 no->pai->pai->cor = Vermelho;
@@ -237,7 +259,7 @@ void balancear(Arvore* arvore, No* no) {
         }
         else {
             No *tio = no->pai->pai->esquerda;
-            if (tio->cor == Vermelho) {
+            if (tio != NULL && tio->cor == Vermelho) {
                 tio->cor = Preto; // caso 2
                 no->pai->cor = Preto;
                 no->pai->pai->cor = Vermelho;
@@ -257,7 +279,8 @@ void balancear(Arvore* arvore, No* no) {
         }
     }
 
-    arvore->raiz->cor = Preto; // caso 1
+    if (arvore->raiz != NULL)
+        arvore->raiz->cor = Preto; // caso 1
 }
 
 void rotacionar_esquerda(Arvore* arvore, No* no) {
