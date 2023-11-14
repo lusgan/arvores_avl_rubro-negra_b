@@ -32,10 +32,11 @@ void exibir_pre_order(No* no);
 void random_num(int numeros[], int tam);
 int altura(No* no);
 No* encontrar_no(No* no, int valor);
+No* encontrar_minimo(No* no);
 
 void remover(Arvore* arvore, int valor);
-No* encontrar_minimo(No* no);
-void transplant(Arvore* arvore, No* u, No* v);
+void remover_fixup(Arvore* arvore, No* no);
+void trocar_nos(Arvore* arvore, No* no1, No* no2);
 
 int main(int argc, char *argv[]) {
     srand(time(NULL));
@@ -84,81 +85,23 @@ int main(int argc, char *argv[]) {
 }
 
 No* encontrar_no(No* no, int valor) {
-    if (no != NULL) {
-        if (no->valor == valor)
-            return no;
-        
-        if (valor < no->valor)
-            return encontrar_no(no->esquerda, valor);
-        else
-            return encontrar_no(no->direita, valor);
-    }
+    if (no == NULL || no->valor == valor)
+        return no;
 
-    return NULL;
-}
-
-void remover(Arvore* arvore, int valor) {
-    No* z = encontrar_no(arvore->raiz, valor);
-    No* y = z;
-    No* x;
-    Cor cor_original;
-
-    if (z == NULL) {
-        printf("Valor %d nao encontrado na arvore.\n", valor);
-        return;
-    }
-
-    if (z->esquerda == arvore->nulo) {
-        x = z->direita;
-        cor_original = y->cor;
-        transplant(arvore, z, z->direita);
-    } 
-    else if (z->direita == arvore->nulo) {
-        x = z->esquerda;
-        cor_original = y->cor;
-        transplant(arvore, z, z->esquerda);
-    } 
-    else {
-        y = encontrar_minimo(z->direita);
-        cor_original = y->cor;
-        x = y->direita;
-
-        if (y->pai == z)
-            x->pai = y;
-        else {
-            transplant(arvore, y, y->direita);
-            y->direita = z->direita;
-            y->direita->pai = y;
-        }
-
-        transplant(arvore, z, y);
-        y->esquerda = z->esquerda;
-        y->esquerda->pai = y;
-        y->cor = z->cor;
-    }
-
-    free(z);
-
-    if (cor_original == Preto)
-        balancear(arvore, x);
+    if (valor < no->valor)
+        return encontrar_no(no->esquerda, valor);
+    else
+        return encontrar_no(no->direita, valor);
 }
 
 No* encontrar_minimo(No* no) {
-    while (no->esquerda)
-        no = no->esquerda;
-    return no;
-}
+    if (no == NULL)
+        return NULL;
 
-void transplant(Arvore* arvore, No* u, No* v) {
-    if (!u->pai)
-        arvore->raiz = v;
-    else if (u == u->pai->esquerda)
-        u->pai->esquerda = v;
-    else
-        u->pai->direita = v;
-    
-    if (v)
-        v->pai = u->pai;
+    while (no->esquerda != NULL)
+        no = no->esquerda;
+
+    return no;
 }
 
 int altura(No* no){
