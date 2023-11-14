@@ -75,12 +75,14 @@ int main(int argc, char *argv[]) {
     }
     */
 
-    remover(&arvore, 30);
+    //remover(&arvore, 30);
 
+    /*
     printf("Arvore rubro-negra apos remocao:\n");
     exibir_pre_order(arvore.raiz);
     printf("\nAltura: %d\n", altura(arvore.raiz));
-
+    */
+    
     return 0;
 }
 
