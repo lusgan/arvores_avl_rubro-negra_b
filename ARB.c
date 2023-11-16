@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define ARVORE_QUANT 10
+#define ARVORE_QUANT 10000
 
 enum coloracao {Vermelho, Preto};
 typedef enum coloracao Cor;
@@ -20,113 +20,62 @@ typedef struct arvore {
     No *nulo;
 } Arvore;
 
+Arvore* inicializar_arvore();
+No* criar_no(int valor);
 void rotacionar_esquerda(Arvore* arvore, No* no);
 void rotacionar_direita(Arvore* arvore, No* no);
 void balancear(Arvore* arvore, No* no);
-void rotacionar_esquerda(Arvore* arvore, No* no);
-void rotacionar_direita(Arvore* arvore, No* no);
-void inicializar_arvore(Arvore* arvore);
-No* criar_no(Arvore* arvore, int valor);
-void inserir(Arvore* arvore, int valor);
-void exibir_pre_order(No* no);
-void random_num(int numeros[], int tam);
-int altura(No* no);
+void inserir(Arvore* arvore, No* no);
+void transplant(Arvore *arvore, No *u, No *v);
+No* encontrar_minimo(Arvore* arvore, No* no);
 No* encontrar_no(No* no, int valor);
-No* encontrar_minimo(No* no);
-void remover(Arvore* arvore, int valor);
-void contar_nos(No *no, int *cont, Arvore *arvore);
-void preencher_nos(Arvore *arvore, No *no, int *i, int nos[]);
-void encontrar_no_transforma_nulo(No* no, int valor, Arvore* arvore);
+void balancear_remocao(Arvore *arvore, No *no);
+void remover(Arvore *arvore, No *no);
+void exibir_pre_order(No* no);
+int altura(No* no);
+void random_num(int numeros[], int tam);
 
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 
-    int numeros[ARVORE_QUANT];
+    int random_numeros[ARVORE_QUANT];
     for (int i = 0; i < ARVORE_QUANT; i++)
-        numeros[i] = i + 1;
+        random_numeros[i] = i + 1;
 
-    random_num(numeros, ARVORE_QUANT); // randomiza o array de valores
+    random_num(random_numeros, ARVORE_QUANT); // randomiza o array de valores
 
-    Arvore arvore;
-    inicializar_arvore(&arvore);
+    Arvore *arvore = inicializar_arvore();
 
-    for (int i = 0; i < ARVORE_QUANT + 1; i++)
-        inserir(&arvore, numeros[i]);
-
-    printf("Arvore rubro-negra com %d elementos:\n", ARVORE_QUANT);
-    exibir_pre_order(arvore.raiz);
-    printf("\nAltura: %d\n\n", altura(arvore.raiz));
-
-    random_num(numeros, ARVORE_QUANT); // randomiza o array de valores
-    for (int i = 0; i < ARVORE_QUANT + 1; i++) {
-       remover(&arvore, numeros[i]);
+    No *numeros[ARVORE_QUANT];  
+    for (int i = 0; i < ARVORE_QUANT; i++) {
+        numeros[i] = criar_no(random_numeros[i]);
+        inserir(arvore, numeros[i]);
     }
 
-    printf("Arvore rubro-negra apos remocao:\n");
-    exibir_pre_order(arvore.raiz);
-    printf("\nAltura: %d\n", altura(arvore.raiz));
+    printf("\nArvore rubro-negra com %d elementos:\n", ARVORE_QUANT);
+    exibir_pre_order(arvore->raiz);
+    printf("\nAltura: %d\n\n", altura(arvore->raiz));
+
+    for (int i = 0; i < 100; i++) {
+       remover(arvore, numeros[i]);
+    }
+
+    printf("\nArvore rubro-negra apos remocao:\n");
+    exibir_pre_order(arvore->raiz);
+    printf("\nAltura: %d\n\n", altura(arvore->raiz));
     
     return 0;
 }
 
-void contar_nos(No *no, int *cont, Arvore *arvore) {
-    if (no != arvore->nulo) {
-        (*cont)++;
-        contar_nos(no->esquerda, cont, arvore);
-        contar_nos(no->direita, cont, arvore);
-    }
-}
-
-void remover(Arvore* arvore, int valor) {
-    No *no = encontrar_no(arvore->raiz, valor);
-
-    if (no == NULL) {
-        printf("No %d nao encontrado na arvore!\n", valor);
-        return;
-    }
-
-    int cont = 0, i = 0;
-    contar_nos(no, &cont, arvore);
-    int nos[cont];
-
-    preencher_nos(arvore, no, &i, nos);
-
-    encontrar_no_transforma_nulo(arvore->raiz, valor, arvore);
-
-    printf("%d\n", cont);
-    for (i = 0; i < cont; i++) {
-        printf("NOS = %d \n", nos[i]);
-    }
-
-    for (i = 0; i < cont; i++) {
-        if (nos[i] != valor)
-            inserir(arvore, nos[i]);
-    }
-}
-
-void encontrar_no_transforma_nulo(No* no, int valor, Arvore* arvore) {
-    if (no->valor == valor) {
-        if (no->pai->esquerda->valor == valor)
-            no->pai->esquerda = arvore->nulo;
-        if (no->pai->direita->valor == valor)
-            no->pai->direita = arvore->nulo;
-        return;
-    }
-
-    if (valor < no->valor)
-        return encontrar_no_transforma_nulo(no->esquerda, valor, arvore);
+void transplant(Arvore *arvore, No *u, No *v) {
+    if (u->pai == arvore->nulo)
+        arvore->raiz = v;
+    else if (u == u->pai->esquerda)
+        u->pai->esquerda = v;
     else
-        return encontrar_no_transforma_nulo(no->direita, valor, arvore);
-}
-
-void preencher_nos(Arvore *arvore, No *no, int *i, int nos[]) {
-    if (no != NULL && no != arvore->nulo) {
-        nos[(*i)] = no->valor;
-        (*i)++;
-
-        preencher_nos(arvore, no->esquerda, i, nos);
-        preencher_nos(arvore, no->direita, i, nos);
-    }
+        u->pai->direita = v;
+    
+    v->pai = u->pai;
 }
 
 No* encontrar_no(No* no, int valor) {
@@ -139,11 +88,8 @@ No* encontrar_no(No* no, int valor) {
         return encontrar_no(no->direita, valor);
 }
 
-No* encontrar_minimo(No* no) {
-    if (no == NULL)
-        return NULL;
-
-    while (no->esquerda != NULL)
+No* encontrar_minimo(Arvore *arvore, No* no) {
+    while (no->esquerda != arvore->nulo)
         no = no->esquerda;
 
     return no;
@@ -181,31 +127,42 @@ void exibir_pre_order(No* no) {
     }
 }
 
-void inicializar_arvore(Arvore* arvore) {
-    arvore->nulo = malloc(sizeof(No));
-    arvore->nulo->cor = Preto;
+Arvore* inicializar_arvore() {
+    Arvore *arvore = (Arvore*) malloc(sizeof(Arvore));
+
+    No *nulo = malloc(sizeof(No));
+    nulo->pai = NULL;
+    nulo->esquerda = NULL;
+    nulo->direita = NULL;
+    nulo->cor = Preto;
+    nulo->valor = 0;
+
+    arvore->nulo = nulo;
     arvore->raiz = arvore->nulo;
+
+    return arvore;
 }
 
-No* criar_no(Arvore* arvore, int valor) {
+No* criar_no(int valor) {
     No* novo = malloc(sizeof(No));
+
     novo->valor = valor;
-    novo->esquerda = arvore->nulo;
-    novo->direita = arvore->nulo;
+    novo->pai = NULL;
+    novo->esquerda = NULL;
+    novo->direita = NULL;
     novo->cor = Vermelho;
 
     return novo;
 }
 
-void inserir(Arvore* arvore, int valor) {
-    No* no = criar_no(arvore, valor);
+void inserir(Arvore* arvore, No *no) {
     No* pai = arvore->nulo;
     No* atual = arvore->raiz;
 
     while (atual != arvore->nulo) {
         pai = atual;
 
-        if (valor < atual->valor)
+        if (no->valor < atual->valor)
             atual = atual->esquerda;
         else
             atual = atual->direita;
@@ -215,10 +172,13 @@ void inserir(Arvore* arvore, int valor) {
 
     if (pai == arvore->nulo)
         arvore->raiz = no;
-    else if (valor < pai->valor)
+    else if (no->valor < pai->valor)
         pai->esquerda = no;
     else
         pai->direita = no;
+
+    no->direita = arvore->nulo;
+    no->esquerda = arvore->nulo;
 
     balancear(arvore, no);
 }
@@ -309,4 +269,117 @@ void rotacionar_direita(Arvore* arvore, No* no) {
 
     esquerda->direita = no; // corrige relacao pai-filho entre o no pivo e o no a esquerda
     no->pai = esquerda;
+}
+
+void balancear_remocao(Arvore *arvore, No *no) {
+    while (no != arvore->raiz && no->cor == Preto) {
+        if (no == no->pai->esquerda) {
+            No *aux = no->pai->direita;
+
+            if (aux->cor == Vermelho) {
+                aux->cor = Preto;
+                no->pai->cor = Vermelho;
+
+                rotacionar_esquerda(arvore, no->pai);
+
+                aux = no->pai->direita;
+            }
+            if (aux->esquerda->cor == Preto && aux->direita->cor == Preto) {
+                aux->cor = Vermelho;
+                no = no->pai;
+            }
+            else {
+                if(aux->direita->cor == Preto) {
+                    aux->esquerda->cor = Preto;
+                    aux->cor = Vermelho;
+
+                    rotacionar_direita(arvore, aux);
+
+                    aux = no->pai->direita;
+                }
+
+                aux->cor = no->pai->cor;
+                no->pai->cor = Preto;
+                aux->direita->cor = Preto;
+
+                rotacionar_esquerda(arvore, no->pai);
+
+                no = arvore->raiz;
+            }
+        }
+        else {
+            No *aux = no->pai->esquerda;
+
+            if (aux->cor == Vermelho) {
+                aux->cor = Preto;
+                no->pai->cor = Vermelho;
+
+                rotacionar_direita(arvore, no->pai);
+
+                aux = no->pai->esquerda;
+            }
+            if (aux->direita->cor == Preto && aux->esquerda->cor == Preto) {
+                aux->cor = Vermelho;
+                no = no->pai;
+            }
+            else {
+                if (aux->esquerda->cor == Preto) {
+                    aux->direita->cor = Preto;
+                    aux->cor = Vermelho;
+
+                    rotacionar_esquerda(arvore, aux);
+
+                    aux = no->pai->esquerda;
+                }
+        
+                aux->cor = no->pai->cor;
+                no->pai->cor = Preto;
+                aux->esquerda->cor = Preto;
+
+                rotacionar_direita(arvore, no->pai);
+
+                no = arvore->raiz;
+            }
+        }
+    }
+
+    no->cor = Preto;
+}
+
+void remover(Arvore *arvore, No *no) {
+    No *aux1 = no;
+    No *aux2;
+    Cor aux1_cor = aux1->cor;
+
+    if (no->esquerda == arvore->nulo) {
+        aux2 = no->direita;
+        transplant(arvore, no, no->direita);
+    }
+    else if (no->direita == arvore->nulo) {
+        aux2 = no->esquerda;
+        transplant(arvore, no, no->esquerda);
+    }
+    else {
+        aux1 = encontrar_minimo(arvore, no->direita);
+        aux1_cor = aux1->cor;
+        aux2 = aux1->direita;
+
+        if (aux1->pai == no) {
+            aux2->pai = no;
+        }
+        else {
+            transplant(arvore, aux1, aux1->direita);
+            aux1->direita = no->direita;
+            aux1->direita->pai = aux1;
+        }
+
+        transplant(arvore, no, aux1);
+
+        aux1->esquerda = no->esquerda;
+        aux1->esquerda->pai = aux1;
+        aux1->cor = no->cor;
+    }
+
+    if (aux1_cor == Preto)
+        balancear_remocao(arvore, aux2);
 }
