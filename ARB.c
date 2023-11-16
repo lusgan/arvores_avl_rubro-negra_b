@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define ARVORE_QUANT 10000
+#define ARVORE_QUANT 10
 
 enum coloracao {Vermelho, Preto};
 typedef enum coloracao Cor;
@@ -34,7 +34,9 @@ int altura(No* no);
 No* encontrar_no(No* no, int valor);
 No* encontrar_minimo(No* no);
 void remover(Arvore* arvore, int valor);
-void contar_nos(No *no, int *cont);
+void contar_nos(No *no, int *cont, Arvore *arvore);
+void preencher_nos(Arvore *arvore, No *no, int *i, int nos[]);
+void encontrar_no_transforma_nulo(No* no, int valor, Arvore* arvore);
 
 int main(int argc, char *argv[]) {
     srand(time(NULL));
@@ -48,32 +50,17 @@ int main(int argc, char *argv[]) {
     Arvore arvore;
     inicializar_arvore(&arvore);
 
-    /*
     for (int i = 0; i < ARVORE_QUANT + 1; i++)
         inserir(&arvore, numeros[i]);
-    */
-
-    inserir(&arvore, 10);
-    inserir(&arvore, 5);
-    inserir(&arvore, 30);
-    inserir(&arvore, 2);
-    inserir(&arvore, 9);
-    inserir(&arvore, 25);
-    inserir(&arvore, 40);
-    inserir(&arvore, 38);
 
     printf("Arvore rubro-negra com %d elementos:\n", ARVORE_QUANT);
     exibir_pre_order(arvore.raiz);
     printf("\nAltura: %d\n\n", altura(arvore.raiz));
 
-    /*
     random_num(numeros, ARVORE_QUANT); // randomiza o array de valores
     for (int i = 0; i < ARVORE_QUANT + 1; i++) {
        remover(&arvore, numeros[i]);
     }
-    */
-
-    remover(&arvore, 30);
 
     printf("Arvore rubro-negra apos remocao:\n");
     exibir_pre_order(arvore.raiz);
@@ -82,37 +69,64 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void contar_nos(No *no, int *cont) {
-    if (no != NULL) {
+void contar_nos(No *no, int *cont, Arvore *arvore) {
+    if (no != arvore->nulo) {
         (*cont)++;
-        contar_nos(no->esquerda, cont);
-        contar_nos(no->direita, cont);
+        contar_nos(no->esquerda, cont, arvore);
+        contar_nos(no->direita, cont, arvore);
     }
 }
 
 void remover(Arvore* arvore, int valor) {
     No *no = encontrar_no(arvore->raiz, valor);
 
-    int cont = 0;
-    contar_nos(no, &cont);
-    int nos[cont];
-
-    int i = 0;
-    void preencher_nos(No *no) {
-        if (no != NULL && no->valor != 0) {
-            nos[i] = no->valor;
-            printf("No->%d\n", no->valor);
-            preencher_nos(no->esquerda);
-            preencher_nos(no->direita);
-
-            i++;
-        }
+    if (no == NULL) {
+        printf("No %d nao encontrado na arvore!\n", valor);
+        return;
     }
 
-    preencher_nos(no);
+    int cont = 0, i = 0;
+    contar_nos(no, &cont, arvore);
+    int nos[cont];
 
-    for (i = 0; i < cont; i++)
-        inserir(arvore, nos[i]);
+    preencher_nos(arvore, no, &i, nos);
+
+    encontrar_no_transforma_nulo(arvore->raiz, valor, arvore);
+
+    printf("%d\n", cont);
+    for (i = 0; i < cont; i++) {
+        printf("NOS = %d \n", nos[i]);
+    }
+
+    for (i = 0; i < cont; i++) {
+        if (nos[i] != valor)
+            inserir(arvore, nos[i]);
+    }
+}
+
+void encontrar_no_transforma_nulo(No* no, int valor, Arvore* arvore) {
+    if (no->valor == valor) {
+        if (no->pai->esquerda->valor == valor)
+            no->pai->esquerda = arvore->nulo;
+        if (no->pai->direita->valor == valor)
+            no->pai->direita = arvore->nulo;
+        return;
+    }
+
+    if (valor < no->valor)
+        return encontrar_no_transforma_nulo(no->esquerda, valor, arvore);
+    else
+        return encontrar_no_transforma_nulo(no->direita, valor, arvore);
+}
+
+void preencher_nos(Arvore *arvore, No *no, int *i, int nos[]) {
+    if (no != NULL && no != arvore->nulo) {
+        nos[(*i)] = no->valor;
+        (*i)++;
+
+        preencher_nos(arvore, no->esquerda, i, nos);
+        preencher_nos(arvore, no->direita, i, nos);
+    }
 }
 
 No* encontrar_no(No* no, int valor) {
