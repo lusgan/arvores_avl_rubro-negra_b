@@ -33,10 +33,8 @@ void random_num(int numeros[], int tam);
 int altura(No* no);
 No* encontrar_no(No* no, int valor);
 No* encontrar_minimo(No* no);
-
 void remover(Arvore* arvore, int valor);
-void remover_fixup(Arvore* arvore, No* no);
-void trocar_nos(Arvore* arvore, No* no1, No* no2);
+void contar_nos(No *no, int *cont);
 
 int main(int argc, char *argv[]) {
     srand(time(NULL));
@@ -75,15 +73,46 @@ int main(int argc, char *argv[]) {
     }
     */
 
-    //remover(&arvore, 30);
+    remover(&arvore, 30);
 
-    /*
     printf("Arvore rubro-negra apos remocao:\n");
     exibir_pre_order(arvore.raiz);
     printf("\nAltura: %d\n", altura(arvore.raiz));
-    */
     
     return 0;
+}
+
+void contar_nos(No *no, int *cont) {
+    if (no != NULL) {
+        (*cont)++;
+        contar_nos(no->esquerda, cont);
+        contar_nos(no->direita, cont);
+    }
+}
+
+void remover(Arvore* arvore, int valor) {
+    No *no = encontrar_no(arvore->raiz, valor);
+
+    int cont = 0;
+    contar_nos(no, &cont);
+    int nos[cont];
+
+    int i = 0;
+    void preencher_nos(No *no) {
+        if (no != NULL && no->valor != 0) {
+            nos[i] = no->valor;
+            printf("No->%d\n", no->valor);
+            preencher_nos(no->esquerda);
+            preencher_nos(no->direita);
+
+            i++;
+        }
+    }
+
+    preencher_nos(no);
+
+    for (i = 0; i < cont; i++)
+        inserir(arvore, nos[i]);
 }
 
 No* encontrar_no(No* no, int valor) {
