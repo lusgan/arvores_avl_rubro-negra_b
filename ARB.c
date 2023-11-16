@@ -33,16 +33,13 @@ void balancear_remocao(Arvore *arvore, No *no);
 void remover(Arvore *arvore, No *no);
 void exibir_pre_order(No* no);
 int altura(No* no);
-void random_num(int numeros[], int tam);
+void random_num(int numeros[]);
 
 int main(int argc, char *argv[]) {
-    srand(time(NULL));
-
-    int random_numeros[ARVORE_QUANT];
+    int random_numeros[ARVORE_QUANT]; // geracao de array com numeros "aleatorios" de 1 ate ARVORE_QUANT
     for (int i = 0; i < ARVORE_QUANT; i++)
         random_numeros[i] = i + 1;
-
-    random_num(random_numeros, ARVORE_QUANT); // randomiza o array de valores
+    random_num(random_numeros);
 
     Arvore *arvore = inicializar_arvore();
 
@@ -56,8 +53,9 @@ int main(int argc, char *argv[]) {
     exibir_pre_order(arvore->raiz);
     printf("\nAltura: %d\n\n", altura(arvore->raiz));
 
-    for (int i = 0; i < 100; i++) {
-       remover(arvore, numeros[i]);
+    random_num(random_numeros);
+    for (int i = 0; i < ARVORE_QUANT; i++) {
+        remover(arvore, numeros[i]);
     }
 
     printf("\nArvore rubro-negra apos remocao:\n");
@@ -110,12 +108,14 @@ int altura(No* no){
     return esquerda > direita ? esquerda : direita;
 }
 
-void random_num(int numeros[], int tam) {
-    for (int i = tam - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
-        int temp = numeros[i];
-        numeros[i] = numeros[j];
-        numeros[j] = temp;
+void random_num(int numeros[]) {
+    srand(time(NULL));
+
+    for (int i = 0; i < ARVORE_QUANT; i++) {
+        int troca = rand() % ARVORE_QUANT;
+        int aux = numeros[i];
+        numeros[i] = numeros[troca];
+        numeros[troca] = aux;
     }
 }
 
@@ -272,78 +272,74 @@ void rotacionar_direita(Arvore* arvore, No* no) {
 }
 
 void balancear_remocao(Arvore *arvore, No *no) {
-    while (no != arvore->raiz && no->cor == Preto) {
+    while (no != arvore->raiz && no != NULL && no->cor == Preto) {
         if (no == no->pai->esquerda) {
-            No *aux = no->pai->direita;
+            No *irmao = no->pai->direita;
 
-            if (aux->cor == Vermelho) {
-                aux->cor = Preto;
-                no->pai->cor = Vermelho;
-
-                rotacionar_esquerda(arvore, no->pai);
-
-                aux = no->pai->direita;
-            }
-            if (aux->esquerda->cor == Preto && aux->direita->cor == Preto) {
-                aux->cor = Vermelho;
-                no = no->pai;
-            }
-            else {
-                if(aux->direita->cor == Preto) {
-                    aux->esquerda->cor = Preto;
-                    aux->cor = Vermelho;
-
-                    rotacionar_direita(arvore, aux);
-
-                    aux = no->pai->direita;
+            if (irmao != NULL) {
+                if (irmao->cor == Vermelho) {
+                    irmao->cor = Preto;
+                    no->pai->cor = Vermelho;
+                    rotacionar_esquerda(arvore, no->pai);
+                    irmao = no->pai->direita;
                 }
 
-                aux->cor = no->pai->cor;
-                no->pai->cor = Preto;
-                aux->direita->cor = Preto;
+                if (irmao != NULL && irmao->esquerda != NULL && irmao->direita != NULL &&
+                    irmao->esquerda->cor == Preto && irmao->direita->cor == Preto) {
+                    irmao->cor = Vermelho;
+                    no = no->pai;
+                } else {
+                    if (irmao != NULL && irmao->direita != NULL && irmao->direita->cor == Preto) {
+                        irmao->esquerda->cor = Preto;
+                        irmao->cor = Vermelho;
+                        rotacionar_direita(arvore, irmao);
+                        irmao = no->pai->direita;
+                    }
 
-                rotacionar_esquerda(arvore, no->pai);
+                    if (irmao != NULL) {
+                        irmao->cor = no->pai->cor;
+                        no->pai->cor = Preto;
+                        if (irmao->direita != NULL) {
+                            irmao->direita->cor = Preto;
+                        }
+                        rotacionar_esquerda(arvore, no->pai);
+                    }
 
-                no = arvore->raiz;
-            }
-        }
-        else {
-            No *aux = no->pai->esquerda;
-
-            if (aux->cor == Vermelho) {
-                aux->cor = Preto;
-                no->pai->cor = Vermelho;
-
-                rotacionar_direita(arvore, no->pai);
-
-                aux = no->pai->esquerda;
-            }
-            if (aux->direita->cor == Preto && aux->esquerda->cor == Preto) {
-                aux->cor = Vermelho;
-                no = no->pai;
-            }
-            else {
-                if (aux->esquerda->cor == Preto) {
-                    aux->direita->cor = Preto;
-                    aux->cor = Vermelho;
-
-                    rotacionar_esquerda(arvore, aux);
-
-                    aux = no->pai->esquerda;
+                    no = arvore->raiz;
                 }
-        
-                aux->cor = no->pai->cor;
-                no->pai->cor = Preto;
-                aux->esquerda->cor = Preto;
+            }
+        } else {
+            No *irmao = no->pai->esquerda;
 
+            if (irmao->cor == Vermelho) {
+                irmao->cor = Preto;
+                no->pai->cor = Vermelho;
                 rotacionar_direita(arvore, no->pai);
+                irmao = no->pai->esquerda;
+            }
 
+            if (irmao->direita->cor == Preto && irmao->esquerda->cor == Preto) {
+                irmao->cor = Vermelho;
+                no = no->pai;
+            } else {
+                if (irmao->esquerda->cor == Preto) {
+                    irmao->direita->cor = Preto;
+                    irmao->cor = Vermelho;
+                    rotacionar_esquerda(arvore, irmao);
+                    irmao = no->pai->esquerda;
+                }
+
+                irmao->cor = no->pai->cor;
+                no->pai->cor = Preto;
+                irmao->esquerda->cor = Preto;
+                rotacionar_direita(arvore, no->pai);
                 no = arvore->raiz;
             }
         }
     }
 
-    no->cor = Preto;
+    if (no != NULL)
+        no->cor = Preto;
 }
 
 void remover(Arvore *arvore, No *no) {
@@ -354,20 +350,17 @@ void remover(Arvore *arvore, No *no) {
     if (no->esquerda == arvore->nulo) {
         aux2 = no->direita;
         transplant(arvore, no, no->direita);
-    }
-    else if (no->direita == arvore->nulo) {
+    } else if (no->direita == arvore->nulo) {
         aux2 = no->esquerda;
         transplant(arvore, no, no->esquerda);
-    }
-    else {
+    } else {
         aux1 = encontrar_minimo(arvore, no->direita);
         aux1_cor = aux1->cor;
         aux2 = aux1->direita;
 
         if (aux1->pai == no) {
-            aux2->pai = no;
-        }
-        else {
+            aux2->pai = aux1;
+        } else {
             transplant(arvore, aux1, aux1->direita);
             aux1->direita = no->direita;
             aux1->direita->pai = aux1;
