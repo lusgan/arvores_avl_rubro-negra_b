@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "time.h": "c",
-        "numbers": "c"
+        "numbers": "c",
+        "unistd.h": "c"
     }
 }
