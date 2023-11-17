@@ -1,8 +1,8 @@
-// C program to insert a node in AVL tree 
 #include<stdio.h> 
 #include<stdlib.h> 
+#include <time.h>
+#define arvore_quant 10000
 
-// An AVL tree node 
 struct Node 
 { 
 	int key; 
@@ -11,8 +11,7 @@ struct Node
     struct Node *dad;
 	int height; 
 }; 
-
-// A utility function to get the height of the tree 
+ 
 int height(struct Node *N) 
 { 
 	if (N == NULL) 
@@ -20,88 +19,78 @@ int height(struct Node *N)
 	return N->height; 
 } 
 
-// A utility function to get maximum of two integers 
 int max(int a, int b) 
 { 
 	return (a > b)? a : b; 
 } 
 
-/* Helper function that allocates a new node with the given key and 
-	NULL left and right pointers. */
+/* creates a node */
 struct Node* newNode(int key) 
 { 
-	struct Node* node = (struct Node*) 
-						malloc(sizeof(struct Node)); 
-	node->key = key; 
+	struct Node* node = (struct Node*)malloc(sizeof(struct Node)); 
+	node->key = key;
+	node->dad = NULL; 
 	node->left = NULL; 
 	node->right = NULL; 
-	node->height = 1; // new node is initially added at leaf 
+	node->height = 1; 
 	return(node); 
 } 
 
-// A utility function to right rotate subtree rooted with y 
-// See the diagram given above. 
+
 struct Node *rightRotate(struct Node *y) 
 { 
 	struct Node *x = y->left; 
 	struct Node *T2 = x->right; 
 
-	// Perform rotation 
 	x->right = y; 
 	y->left = T2; 
 
 	// Update heights 
-	y->height = max(height(y->left), 
-					height(y->right)) + 1; 
-	x->height = max(height(x->left), 
-					height(x->right)) + 1; 
-
-	// Return new root 
+	y->height = max(height(y->left),height(y->right)) + 1; 
+	x->height = max(height(x->left),height(x->right)) + 1; 
+ 
 	return x; 
 } 
 
-// A utility function to left rotate subtree rooted with x 
-// See the diagram given above. 
 struct Node *leftRotate(struct Node *x) 
 { 
 	struct Node *y = x->right; 
 	struct Node *T2 = y->left; 
-
-	// Perform rotation 
+ 
 	y->left = x; 
 	x->right = T2; 
 
 	// Update heights 
-	x->height = max(height(x->left), 
-					height(x->right)) + 1; 
-	y->height = max(height(y->left), 
-					height(y->right)) + 1; 
+	x->height = max(height(x->left),height(x->right)) + 1; 
+	y->height = max(height(y->left), height(y->right)) + 1; 
 
-	// Return new root 
 	return y; 
 } 
 
-// Get Balance factor of node N 
-int getBalance(struct Node *N) 
+// Get Balance factor of node No 
+int getBalance(struct Node *No)
 { 
-	if (N == NULL) 
+	if (No == NULL) 
 		return 0; 
-	return height(N->left) - height(N->right); 
+	return height(No->left) - height(No->right); 
 } 
 
 // Recursive function to insert a key in the subtree rooted 
 // with node and returns the new root of the subtree. 
 struct Node* insert(struct Node* node, int key, struct Node* dad) 
 { 
-	/* 1. Perform the normal BST insertion */
-	if (node == NULL) 
-		return(newNode(key)); 
 
+	if (node == NULL){
+		struct Node* new = newNode(key);
+		new->dad = dad;
+		return new;
+		//return(newNode(key)); 
+	}
 	if (key < node->key) 
 		node->left = insert(node->left, key, node); 
 	else if (key > node->key) 
 		node->right = insert(node->right, key, node); 
-	else // Equal keys are not allowed in BST 
+	else // Equal keys
 		return node; 
 
 	/* 2. Update height of this ancestor node */
@@ -148,7 +137,7 @@ struct Node* insert(struct Node* node, int key, struct Node* dad)
 void preOrder(struct Node *root) 
 { 
 	if(root != NULL) 
-	{ 
+	{ 	
 		printf("valor %d, altura = %d\n", root->key, root->height); 
 		preOrder(root->left); 
 		preOrder(root->right); 
@@ -167,15 +156,16 @@ int main()
 { 
 struct Node *root = NULL; 
 
-
-for(int i = 0; i<1000;i++){
-    root = insert(root,i,NULL);
+srand( (unsigned)time(NULL) );
+for(int i = 0; contar_elementos_no(root)<arvore_quant ;i++){
+	int valor = rand()%arvore_quant;
+    root = insert(root,valor,NULL);
 }
 
-printf("Preorder traversal of the constructed AVL"
-		" tree is \n"); 
-preOrder(root); 
-printf("There are %d elements",contar_elementos_no(root));
+//preOrder(root); 
+printf("the root is %d\n",root->key);
+printf("there are %d levels\n",root->height);
+printf("There are %d elements\n\n",contar_elementos_no(root));
 
 return 0; 
 } 
