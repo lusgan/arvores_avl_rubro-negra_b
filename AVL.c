@@ -151,21 +151,20 @@ int contar_elementos_no(struct Node* no) {
     return 1 + contar_elementos_no(no->left) + contar_elementos_no(no->right);
 }
 
-/* Driver program to test above function*/
-int main() 
-{ 
-struct Node *root = NULL; 
 
-srand( (unsigned)time(NULL) );
-for(int i = 0; contar_elementos_no(root)<arvore_quant ;i++){
-	int valor = rand()%arvore_quant;
-    root = insert(root,valor,NULL);
-}
+int main() { 
+	struct Node *root = NULL; 
 
-//preOrder(root); 
-printf("the root is %d\n",root->key);
-printf("there are %d levels\n",root->height);
-printf("There are %d elements\n\n",contar_elementos_no(root));
+	srand( (unsigned)time(NULL) );
+	for(int i = 0; contar_elementos_no(root)<arvore_quant ;i++){
+		int valor = rand()%arvore_quant;
+		root = insert(root,valor,NULL);
+	}
 
-return 0; 
+
+	printf("the root is %d\n",root->key);
+	printf("there are %d levels\n",root->height);
+	printf("There are %d elements\n\n",contar_elementos_no(root));
+
+	return 0; 
 } 
