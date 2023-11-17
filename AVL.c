@@ -1,219 +1,181 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+// C program to insert a node in AVL tree 
+#include<stdio.h> 
+#include<stdlib.h> 
 
-#define ARVORE_QUANT 10000
+// An AVL tree node 
+struct Node 
+{ 
+	int key; 
+	struct Node *left; 
+	struct Node *right; 
+    struct Node *dad;
+	int height; 
+}; 
 
-typedef struct no {
-    struct no* pai;
-    struct no* esquerda;
-    struct no* direita;
-    float valor;
-    int altura;
-} No;
+// A utility function to get the height of the tree 
+int height(struct Node *N) 
+{ 
+	if (N == NULL) 
+		return 0; 
+	return N->height; 
+} 
 
-typedef struct arvore {
-    struct no* raiz;
-} Arvore;
+// A utility function to get maximum of two integers 
+int max(int a, int b) 
+{ 
+	return (a > b)? a : b; 
+} 
 
-Arvore* cria() {
-    Arvore* arvore = malloc(sizeof(Arvore));
-    arvore->raiz = NULL;
-    return arvore;
-}
+/* Helper function that allocates a new node with the given key and 
+	NULL left and right pointers. */
+struct Node* newNode(int key) 
+{ 
+	struct Node* node = (struct Node*) 
+						malloc(sizeof(struct Node)); 
+	node->key = key; 
+	node->left = NULL; 
+	node->right = NULL; 
+	node->height = 1; // new node is initially added at leaf 
+	return(node); 
+} 
 
-int vazia(Arvore* arvore) {
-    return (arvore->raiz == NULL);
-}
+// A utility function to right rotate subtree rooted with y 
+// See the diagram given above. 
+struct Node *rightRotate(struct Node *y) 
+{ 
+	struct Node *x = y->left; 
+	struct Node *T2 = x->right; 
 
-int altura(No* no) {
-    if (no == NULL)
-        return 0;
-    return no->altura;
-}
+	// Perform rotation 
+	x->right = y; 
+	y->left = T2; 
 
-int max(int a, int b) {
-    return (a > b) ? a : b;
-}
+	// Update heights 
+	y->height = max(height(y->left), 
+					height(y->right)) + 1; 
+	x->height = max(height(x->left), 
+					height(x->right)) + 1; 
 
-void atualizaAltura(No* no) {
-    if (no != NULL) {
-        no->altura = max(altura(no->esquerda), altura(no->direita)) + 1;
-    }
-}
+	// Return new root 
+	return x; 
+} 
 
-No* criaNo(float valor) {
-    No* no = malloc(sizeof(No));
-    no->pai = NULL;
-    no->esquerda = NULL;
-    no->direita = NULL;
-    no->valor = valor;
-    no->altura = 1;
-    return no;
-}
+// A utility function to left rotate subtree rooted with x 
+// See the diagram given above. 
+struct Node *leftRotate(struct Node *x) 
+{ 
+	struct Node *y = x->right; 
+	struct Node *T2 = y->left; 
 
-No* rotacaoDireita(No* y, Arvore* arvore) {
-    No* x = y->esquerda;
-    No* T2 = x->direita;
+	// Perform rotation 
+	y->left = x; 
+	x->right = T2; 
 
-    x->direita = y;
-    y->esquerda = T2;
+	// Update heights 
+	x->height = max(height(x->left), 
+					height(x->right)) + 1; 
+	y->height = max(height(y->left), 
+					height(y->right)) + 1; 
 
-    y->altura = max(altura(y->esquerda), altura(y->direita)) + 1;
-    x->altura = max(altura(x->esquerda), altura(x->direita)) + 1;
+	// Return new root 
+	return y; 
+} 
 
-    if (y == arvore->raiz) {
-        arvore->raiz = x;
-    }
+// Get Balance factor of node N 
+int getBalance(struct Node *N) 
+{ 
+	if (N == NULL) 
+		return 0; 
+	return height(N->left) - height(N->right); 
+} 
 
-    // Atualiza o ponteiro pai de y e x
-    x->pai = y->pai;
-    y->pai = x;
+// Recursive function to insert a key in the subtree rooted 
+// with node and returns the new root of the subtree. 
+struct Node* insert(struct Node* node, int key, struct Node* dad) 
+{ 
+	/* 1. Perform the normal BST insertion */
+	if (node == NULL) 
+		return(newNode(key)); 
 
-    return x;
-}
+	if (key < node->key) 
+		node->left = insert(node->left, key, node); 
+	else if (key > node->key) 
+		node->right = insert(node->right, key, node); 
+	else // Equal keys are not allowed in BST 
+		return node; 
 
-No* rotacaoEsquerda(No* x, Arvore* arvore) {
-    No* y = x->direita;
-    No* T2 = y->esquerda;
+	/* 2. Update height of this ancestor node */
+	node->height = 1 + max(height(node->left), 
+						height(node->right)); 
 
-    y->esquerda = x;
-    x->direita = T2;
+	/* 3. Get the balance factor of this ancestor 
+		node to check whether this node became 
+		unbalanced */
+	int balance = getBalance(node); 
 
-    x->altura = max(altura(x->esquerda), altura(x->direita)) + 1;
-    y->altura = max(altura(y->esquerda), altura(y->direita)) + 1;
+	// If this node becomes unbalanced, then 
+	// there are 4 cases 
 
-    if (x == arvore->raiz) {
-        arvore->raiz = y;
-    }
+	// Left Left Case 
+	if (balance > 1 && key < node->left->key) 
+		return rightRotate(node); 
 
-    // Atualiza o ponteiro pai de x e y
-    y->pai = x->pai;
-    x->pai = y;
+	// Right Right Case 
+	if (balance < -1 && key > node->right->key) 
+		return leftRotate(node); 
 
-    return y;
-}
+	// Left Right Case 
+	if (balance > 1 && key > node->left->key) 
+	{ 
+		node->left = leftRotate(node->left); 
+		return rightRotate(node); 
+	} 
 
+	// Right Left Case 
+	if (balance < -1 && key < node->right->key) 
+	{ 
+		node->right = rightRotate(node->right); 
+		return leftRotate(node); 
+	} 
 
-int fb(No* no) {
-    if (no == NULL)
-        return 0;
-    return altura(no->esquerda) - altura(no->direita);
-}
+	/* return the (unchanged) node pointer */
+	return node; 
+} 
 
-int esforco = 0;
+// A utility function to print preorder traversal 
+// of the tree. 
+// The function also prints height of every node 
+void preOrder(struct Node *root) 
+{ 
+	if(root != NULL) 
+	{ 
+		printf("valor %d, altura = %d\n", root->key, root->height); 
+		preOrder(root->left); 
+		preOrder(root->right); 
+	} 
+} 
 
-No* inserir(No* no, float valor, Arvore* arvore, No* pai) {
-    //encontrou o no onde deve ser inserido o valor
+int contar_elementos_no(struct Node* no) {
     if (no == NULL) {
-        No* novoNo = criaNo(valor);
-        novoNo->pai = pai;
-        return novoNo;
+        return 0;
     }
-
-    //busca recursivamente o no do codigo acima
-    if (valor < no->valor) {
-        no->esquerda = inserir(no->esquerda, valor, arvore, no);
-        esforco++;
-    } else if (valor > no->valor) {
-        no->direita = inserir(no->direita, valor, arvore, no);
-        esforco++;
-    } else {
-        // Valor j� existe
-        return no;
-    }
-
-    atualizaAltura(no);
-
-    int balance = fb(no);
-
-    // Casos de desbalanceamento
-
-    // Caso LL
-    if (balance > 1 && valor < no->esquerda->valor) {
-        no = rotacaoDireita(no, arvore);
-        esforco++;
-    }
-
-    // Caso RR
-    if (balance < -1 && valor > no->direita->valor) {
-        no = rotacaoEsquerda(no, arvore);
-        esforco++;
-    }
-
-    // Caso LR
-    if (balance > 1 && valor > no->esquerda->valor) {
-        no->esquerda = rotacaoEsquerda(no->esquerda, arvore);
-        no = rotacaoDireita(no, arvore);
-    }
-
-    // Caso RL
-    if (balance < -1 && valor < no->direita->valor) {
-        no->direita = rotacaoDireita(no->direita, arvore);
-        no = rotacaoEsquerda(no, arvore);
-    }
-
-    // Retornar o n� ajustado
-    return no;
+    return 1 + contar_elementos_no(no->left) + contar_elementos_no(no->right);
 }
 
+/* Driver program to test above function*/
+int main() 
+{ 
+struct Node *root = NULL; 
 
-void adicionar(Arvore* arvore, float valor) {
-    arvore->raiz = inserir(arvore->raiz, valor, arvore, NULL);
+
+for(int i = 0; i<1000;i++){
+    root = insert(root,i,NULL);
 }
 
+printf("Preorder traversal of the constructed AVL"
+		" tree is \n"); 
+preOrder(root); 
+printf("There are %d elements",contar_elementos_no(root));
 
-
-void printer(No* v) {
-    if (v == NULL) {
-        return;
-    } else if (v->pai == NULL) {
-        printf("%.1f, altura = %d, pai = sem pai\n", v->valor, altura(v));
-    } else {
-        printf("%.1f, altura = %d, pai = %.1f\n", v->valor, altura(v), v->pai->valor);
-    }
-
-    printer(v->esquerda);
-    printer(v->direita);
-}
-
-void random_num(int numeros[], int tam) {
-    for (int i = tam - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
-        int temp = numeros[i];
-        numeros[i] = numeros[j];
-        numeros[j] = temp;
-    }
-}
-
-int main() {
-    /*
-    srand(time(NULL));
-
-    int numeros[ARVORE_QUANT];
-    for (int i = 0; i < ARVORE_QUANT; i++)
-        numeros[i] = i + 1;
-
-    random_num(numeros, ARVORE_QUANT); // randomiza o array de valores
-
-    Arvore* arvore = cria();
-
-    for (int i = 0; i < ARVORE_QUANT + 1; i++)
-        adicionar(arvore, numeros[i]);
-    */
-
-    Arvore* arvore = cria();
-
-    for (int i = 1; i <= 10000; i++) {
-        adicionar(arvore, i);
-    }
-    
-
-    printf("�rvore AVL em ordem pre-order:\n");
-    printer(arvore->raiz);
-    printf("\n\n");
-    printf("altura = %d\n",altura(arvore->raiz));
-    printf("esforco = %d",esforco);
-
-    return 0;
-}
+return 0; 
+} 
