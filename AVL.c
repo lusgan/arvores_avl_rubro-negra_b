@@ -257,7 +257,6 @@ int main() {
 
             }
 
-            //printf("%d elementos, Esforco medio = %.2f\n",quantidade_arvore,esforco_medio/30);
             qtd_elementos[quantidade_arvore/100 - 1] = quantidade_arvore;  
             esforcos_medios[quantidade_arvore/100 - 1] = esforco_medio/30;
             quantidade_arvore+=100;
@@ -285,8 +284,14 @@ int main() {
                 //cria arvore
                 struct No *raiz = NULL; 
                 inseridos = 0;
-                for(int i = 0; inseridos<10000 ;i++){
-                    int valor = rand()%quantidade_arvore;
+                int tamanho_da_arvore = 10000;
+                
+                if(quantidade_arvore<9000){
+                    tamanho_da_arvore = quantidade_arvore +10;
+                }
+
+                for(int i = 0; inseridos<tamanho_da_arvore ;i++){
+                    int valor = rand()%tamanho_da_arvore;
                     raiz = inserir(raiz,valor,NULL);
                 }
                 esforco = 0;
@@ -294,7 +299,7 @@ int main() {
 
                 //remove valores aleatórios 
                 for(int i = 0; deletados<quantidade_arvore ;i++){
-                    int valor = rand()%quantidade_arvore;
+                    int valor = rand()%tamanho_da_arvore;
                     raiz = deletarNo(raiz,valor);
                 }
 
@@ -305,14 +310,39 @@ int main() {
 
             }
 
+            qtd_elementos[quantidade_arvore/100 - 1] = quantidade_arvore;  
+            esforcos_medios[quantidade_arvore/100 - 1] = esforco_medio/30;
             quantidade_arvore+=100;
          }
 
 
+         //sobreescreve o arquivo avl_remocao.txt todos os valores de qtd de elementos, e esforco medio.
+         FILE *arquivo = fopen("avl_remocao.txt", "w");
+         for(int i = 0; i<quantidade_arvore/100 - 1; i++){
+            printf("%d %.2f\n",qtd_elementos[i],esforcos_medios[i]);
+            fprintf(arquivo,"%d %.2f\n",qtd_elementos[i],esforcos_medios[i]);
+        }
 
 
+        /*//cria arvore
+                struct No *raiz = NULL; 
+                inseridos = 0;
+                int tamanho_da_arvore = 1000;
+                for(int i = 0; inseridos<tamanho_da_arvore ;i++){
+                    int valor = rand()%tamanho_da_arvore;
+                    raiz = inserir(raiz,valor,NULL);
+                }
+                esforco = 0;
 
 
+                //remove valores aleatórios 
+                for(int i = 0; deletados<1000 ;i++){
+                    int valor = rand()%tamanho_da_arvore;
+                    raiz = deletarNo(raiz,valor);
+                }
+
+                printf("%d %d\n",deletados,esforco);
+        */
 
     }
     
