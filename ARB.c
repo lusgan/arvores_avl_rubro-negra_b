@@ -38,8 +38,14 @@ int altura(No* no);
 void random_num(int numeros[]);
 
 int main(int argc, char *argv[]) {
-    FILE *arquivo = fopen("arb.txt", "w");
-    if (arquivo == NULL) {
+    FILE *arquivo1 = fopen("arbi.txt", "w");
+    if (arquivo1 == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return 1;
+    }
+
+    FILE *arquivo2 = fopen("arbr.txt", "w");
+    if (arquivo2 == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
     }
@@ -99,9 +105,13 @@ int main(int argc, char *argv[]) {
         printf("Custo medio de insercao: %.2f\n", (custo_medio_insercao) / 10.0);
         printf("Custo medio de remocao: %.2f\n", (custo_medio_remocao) / 10.0);
 
-        FILE *arquivo = fopen("arb.txt", "a");
-        fprintf(arquivo, "%d %.2f %.2f\n", arvore_quant, custo_medio_insercao / 10.0, custo_medio_remocao / 10.0);
-        fclose(arquivo);
+        FILE *arquivo1 = fopen("arbi.txt", "a");
+        fprintf(arquivo1, "%d %.2f\n", arvore_quant, custo_medio_insercao / 10.0);
+        fclose(arquivo1);
+
+        FILE *arquivo2 = fopen("arbr.txt", "a");
+        fprintf(arquivo2, "%d %.2f\n", arvore_quant, custo_medio_remocao / 10.0);
+        fclose(arquivo2);
 
         arvore_quant += 100;
 
