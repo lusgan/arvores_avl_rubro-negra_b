@@ -3,7 +3,7 @@
 #include <time.h>
 #include <unistd.h>
 
-int arvore_quant = 1000;
+int arvore_quant = 100;
 int cont_insere = 0;
 int cont_remove = 0;
 
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     int r = 0;
     int i = 0;
 
-    for (c = 0; c < 10; c++) {
+    for (c = 0; c < 100; c++) {
         printf("Caso %d\n", c);
         for (r = 0; r < 10; r++) {
             printf("Iteracao: %d\n", r);
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
         fprintf(arquivo, "%d %.2f %.2f\n", arvore_quant, custo_medio_insercao / 10.0, custo_medio_remocao / 10.0);
         fclose(arquivo);
 
-        arvore_quant += 1000;
+        arvore_quant += 100;
 
         printf("\n");
     }
