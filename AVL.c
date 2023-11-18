@@ -1,277 +1,285 @@
 #include<stdio.h> 
 #include<stdlib.h> 
 #include <time.h>
-#define arvore_quant 1000
 
-struct Node 
+int quantidade_arvore = 1000;
+int esforco = 0;
+int inseridos = 0;
+
+struct No 
 { 
-	int key; 
-	struct Node *left; 
-	struct Node *right; 
-    struct Node *dad;
-	int height; 
+	int valor; 
+	struct No *esquerda; 
+	struct No *direita; 
+    struct No *pai;
+	int altura; 
 }; 
  
-int height(struct Node *N) 
+int altura(struct No *N) 
 { 
 	if (N == NULL) 
 		return 0; 
-	return N->height; 
+	return N->altura; 
 } 
 
-int max(int a, int b) 
+int maximo(int a, int b) 
 { 
 	return (a > b)? a : b; 
 } 
 
-/* creates a node */
-struct Node* newNode(int key) 
+struct No* novoNo(int valor) 
 { 
-	struct Node* node = (struct Node*)malloc(sizeof(struct Node)); 
-	node->key = key;
-	node->dad = NULL; 
-	node->left = NULL; 
-	node->right = NULL; 
-	node->height = 1; 
-	return(node); 
+	struct No* no = (struct No*)malloc(sizeof(struct No)); 
+	no->valor = valor;
+	no->pai = NULL; 
+	no->esquerda = NULL; 
+	no->direita = NULL; 
+	no->altura = 1; 
+	return(no); 
 } 
 
-
-struct Node *rightRotate(struct Node *y) 
+struct No *rotacaoDireita(struct No *a) 
 { 
-	struct Node *x = y->left; 
-	struct Node *T2 = x->right; 
+    esforco++;
+	struct No *x = a->esquerda; 
+	struct No *b = x->direita; 
 
-	x->right = y; 
-	y->left = T2; 
+	x->direita = a; 
+	a->esquerda = b; 
 
-	// Update heights 
-	y->height = max(height(y->left),height(y->right)) + 1; 
-	x->height = max(height(x->left),height(x->right)) + 1; 
+	a->altura = maximo(altura(a->esquerda),altura(a->direita)) + 1; 
+	x->altura = maximo(altura(x->esquerda),altura(x->direita)) + 1; 
  
 	return x; 
 } 
 
-struct Node *leftRotate(struct Node *x) 
+struct No *rotacaoEsquerda(struct No *a) 
 { 
-	struct Node *y = x->right; 
-	struct Node *T2 = y->left; 
+    esforco++;
+	struct No *x = a->direita; 
+	struct No *b = x->esquerda; 
  
-	y->left = x; 
-	x->right = T2; 
+	x->esquerda = a; 
+	a->direita = b; 
 
-	// Update heights 
-	x->height = max(height(x->left),height(x->right)) + 1; 
-	y->height = max(height(y->left), height(y->right)) + 1; 
+	a->altura = maximo(altura(a->esquerda),altura(a->direita)) + 1; 
+	x->altura = maximo(altura(x->esquerda),altura(x->direita)) + 1; 
 
-	return y; 
+	return x; 
 } 
 
-// Get Balance factor of node No 
-int getBalance(struct Node *No)
+int fb(struct No *no)
 { 
-	if (No == NULL) 
+	if (no == NULL) 
 		return 0; 
-	return height(No->left) - height(No->right); 
+	return altura(no->esquerda) - altura(no->direita); 
 } 
 
-// Recursive function to insert a key in the subtree rooted 
-// with node and returns the new root of the subtree. 
-struct Node* insert(struct Node* node, int key, struct Node* dad){ 
+struct No* inserir(struct No* no, int valor, struct No* pai){ //busca recursivamente o local adequado para inserir o no
 
-	if (node == NULL){
-		struct Node* new = newNode(key);
-		new->dad = dad;
-		return new;
-		//return(newNode(key)); 
+    esforco++;
+	if (no == NULL){ // encontrou o local
+		struct No* novo = novoNo(valor);
+		novo->pai = pai;
+        inseridos++;
+		return novo;
 	}
-	if (key < node->key) 
-		node->left = insert(node->left, key, node); 
-	else if (key > node->key) 
-		node->right = insert(node->right, key, node); 
-	else // Equal keys
-		return node; 
 
-	/* 2. Update height of this ancestor node */
-	node->height = 1 + max(height(node->left), 
-						height(node->right)); 
+	if (valor < no->valor) 
+		no->esquerda = inserir(no->esquerda, valor, no);
 
-	/* 3. Get the balance factor of this ancestor 
-		node to check whether this node became 
-		unbalanced */
-	int balance = getBalance(node); 
+	else if (valor > no->valor) 
+		no->direita = inserir(no->direita, valor, no);
 
-	// If this node becomes unbalanced, then 
-	// there are 4 cases 
+	else//valor passado ja existente na arvore
+		return no; 
 
-	// Left Left Case 
-	if (balance > 1 && key < node->left->key) 
-		return rightRotate(node); 
 
-	// Right Right Case 
-	if (balance < -1 && key > node->right->key) 
-		return leftRotate(node); 
+	no->altura = 1 + maximo(altura(no->esquerda),altura(no->direita)); 
 
-	// Left Right Case 
-	if (balance > 1 && key > node->left->key) 
+	int fator_balanceamento = fb(no); 
+
+    //RD
+	if (fator_balanceamento > 1 && valor < no->esquerda->valor) 
+		return rotacaoDireita(no); 
+
+    //RE
+	if (fator_balanceamento < -1 && valor > no->direita->valor) 
+		return rotacaoEsquerda(no); 
+
+    //RDD
+	if (fator_balanceamento > 1 && valor > no->esquerda->valor) 
 	{ 
-		node->left = leftRotate(node->left); 
-		return rightRotate(node); 
+		no->esquerda = rotacaoEsquerda(no->esquerda); 
+		return rotacaoDireita(no); 
 	} 
 
-	// Right Left Case 
-	if (balance < -1 && key < node->right->key) 
+    //RDE
+	if (fator_balanceamento < -1 && valor < no->direita->valor) 
 	{ 
-		node->right = rightRotate(node->right); 
-		return leftRotate(node); 
+		no->direita = rotacaoDireita(no->direita); 
+		return rotacaoEsquerda(no); 
 	} 
 
-	/* return the (unchanged) node pointer */
-	return node; 
+	return no; 
 } 
 
-// A utility function to print preorder traversal 
-// of the tree. 
-// The function also prints height of every node 
-void preOrder(struct Node *root) 
+void preOrdem(struct No *raiz) 
 { 
-	if(root != NULL) 
+	if(raiz != NULL) 
 	{ 	
-		printf("valor %d, altura = %d\n", root->key, root->height); 
-		preOrder(root->left); 
-		preOrder(root->right); 
+		printf("valor %d, altura = %d\n", raiz->valor, raiz->altura); 
+		preOrdem(raiz->esquerda); 
+		preOrdem(raiz->direita); 
 	} 
 } 
 
-int contar_elementos_no(struct Node* no) {
+int contarElementosNo(struct No* no) {
     if (no == NULL) {
         return 0;
     }
-    return 1 + contar_elementos_no(no->left) + contar_elementos_no(no->right);
+    return 1 + contarElementosNo(no->esquerda) + contarElementosNo(no->direita);
 }
 
-struct Node * minValueNode(struct Node* node)
+struct No *noValorMinimo(struct No* no)
 {
-    struct Node* current = node;
+    struct No* atual = no;
  
-    /* loop down to find the leftmost leaf */
-    while (current->left != NULL)
-        current = current->left;
+    while (atual->esquerda != NULL)
+        atual = atual->esquerda;
  
-    return current;
+    return atual;
 }
  
-// Recursive function to delete a node with given key
-// from subtree with given root. It returns root of
-// the modified subtree.
-struct Node* deleteNode(struct Node* root, int key)
+struct No* deletarNo(struct No* raiz, int valor)
 {
-    // STEP 1: PERFORM STANDARD BST DELETE
+    esforco++;
+    if (raiz == NULL)
+        return raiz;
  
-    if (root == NULL)
-        return root;
+    if ( valor < raiz->valor )
+        raiz->esquerda = deletarNo(raiz->esquerda, valor);
  
-    // If the key to be deleted is smaller than the
-    // root's key, then it lies in left subtree
-    if ( key < root->key )
-        root->left = deleteNode(root->left, key);
+    else if( valor > raiz->valor )
+        raiz->direita = deletarNo(raiz->direita, valor);
  
-    // If the key to be deleted is greater than the
-    // root's key, then it lies in right subtree
-    else if( key > root->key )
-        root->right = deleteNode(root->right, key);
- 
-    // if key is same as root's key, then This is
-    // the node to be deleted
     else
     {
-        // node with only one child or no child
-        if( (root->left == NULL) || (root->right == NULL) )
-        {
-            struct Node *temp = root->left ? root->left :
-                                             root->right;
+        if((raiz->esquerda == NULL) || (raiz->direita == NULL)){
+            struct No *temp = raiz->esquerda ? raiz->esquerda : raiz->direita;
  
-            // No child case
-            if (temp == NULL)
-            {
-                temp = root;
-                root = NULL;
+            if (temp == NULL){
+                temp = raiz;
+                raiz = NULL;
             }
-            else // One child case
-             *root = *temp; // Copy the contents of
-                            // the non-empty child
+            else
+             *raiz = *temp; 
+     
             free(temp);
         }
-        else
-        {
-            // node with two children: Get the inorder
-            // successor (smallest in the right subtree)
-            struct Node* temp = minValueNode(root->right);
- 
-            // Copy the inorder successor's data to this node
-            root->key = temp->key;
- 
-            // Delete the inorder successor
-            root->right = deleteNode(root->right, temp->key);
+
+        else{
+            struct No* temp = noValorMinimo(raiz->direita);
+            raiz->valor = temp->valor;
+            raiz->direita = deletarNo(raiz->direita, temp->valor);
         }
     }
  
-    // If the tree had only one node then return
-    if (root == NULL)
-      return root;
+    if (raiz == NULL)
+      return raiz;
  
-    // STEP 2: UPDATE HEIGHT OF THE CURRENT NODE
-    root->height = 1 + max(height(root->left),
-                           height(root->right));
+    raiz->altura = 1 + maximo(altura(raiz->esquerda),altura(raiz->direita));
+
+    int fator_balanceamento = fb(raiz); 
+    if (fator_balanceamento > 1 && fb(raiz->esquerda) >= 0)
+        return rotacaoDireita(raiz);
  
-    // STEP 3: GET THE BALANCE FACTOR OF THIS NODE (to
-    // check whether this node became unbalanced)
-    int balance = getBalance(root);
- 
-    // If this node becomes unbalanced, then there are 4 cases
- 
-    // Left Left Case
-    if (balance > 1 && getBalance(root->left) >= 0)
-        return rightRotate(root);
- 
-    // Left Right Case
-    if (balance > 1 && getBalance(root->left) < 0)
-    {
-        root->left =  leftRotate(root->left);
-        return rightRotate(root);
+    if (fator_balanceamento > 1 && fb(raiz->esquerda) < 0){
+        raiz->esquerda =  rotacaoEsquerda(raiz->esquerda);
+        return rotacaoDireita(raiz);
     }
  
-    // Right Right Case
-    if (balance < -1 && getBalance(root->right) <= 0)
-        return leftRotate(root);
+    if (fator_balanceamento < -1 && fb(raiz->direita) <= 0)
+        return rotacaoEsquerda(raiz);
  
-    // Right Left Case
-    if (balance < -1 && getBalance(root->right) > 0)
-    {
-        root->right = rightRotate(root->right);
-        return leftRotate(root);
+    if (fator_balanceamento < -1 && fb(raiz->direita) > 0){
+        raiz->direita = rotacaoDireita(raiz->direita);
+        return rotacaoEsquerda(raiz);
     }
  
-    return root;
+    return raiz;
+}
+
+void deletarArvore(struct No *raiz) {
+    if (raiz == NULL) {
+        return;
+    }
+
+    deletarArvore(raiz->esquerda);
+    deletarArvore(raiz->direita);
+
+    free(raiz);
 }
 
 
 int main() { 
-	struct Node *root = NULL; 
 
-	srand( (unsigned)time(NULL) );
-	for(int i = 0; contar_elementos_no(root)<arvore_quant ;i++){
-		int valor = rand()%arvore_quant;
-		root = insert(root,valor,NULL);
-	}
+    int qtd_elementos[100]; // vetor que guarda a qtd de elementos analisados a cada iteracao, na iteracao 0 sao 100, na iteracao1 sao 200 etc.
+    float esforcos_medios[100];// esforco medio na iteracao 0,1,2 etc. esse vetor trabalha em parceria com o de cima
+    quantidade_arvore = 100; // qtd inicial de elementos inseridos ou removidos na arvore, esse valor posteriormente sera incrementado de 100 em 100.
+
+    int caso = 2; //caso 1 -> insercao
+                  //caso 2-> remocao
+
+    srand( (unsigned)time(NULL) );
+
+    if(caso == 1){
+
+        while(quantidade_arvore<10001){
+
+            float esforco_medio = 0;
+        
+            for(int i = 0; i<30;i++){
+                //insere valores aleatórios
+                struct No *raiz = NULL; 
+                for(int i = 0; inseridos<quantidade_arvore ;i++){
+                    int valor = rand()%quantidade_arvore;
+                    raiz = inserir(raiz,valor,NULL);
+                }
+
+                esforco_medio+= esforco;
+                deletarArvore(raiz);
+                esforco = 0;
+                inseridos = 0;
+
+            }
+
+            //printf("%d elementos, Esforco medio = %.2f\n",quantidade_arvore,esforco_medio/50);
+            qtd_elementos[quantidade_arvore/100 - 1] = quantidade_arvore;  
+            esforcos_medios[quantidade_arvore/100 - 1] = esforco_medio/50;
+            quantidade_arvore+=100;
+        }
+
+        //sobreescreve o arquivo avl_inserir.txt todos os valores de qtd de elementos, e esforco medio.
+        FILE *arquivo = fopen("avl_inserir.txt", "w");
+        for(int i = 0; i<quantidade_arvore/100 - 1; i++){
+            printf("%d %.2f\n",qtd_elementos[i],esforcos_medios[i]);
+            fprintf(arquivo,"%d %.2f\n",qtd_elementos[i],esforcos_medios[i]);
+        }
+        fclose(arquivo);
+
+    }
+
+    else if(caso == 2){
+
+    }
+    
 
 
-	printf("the root is %d\n",root->key);
-	printf("there are %d levels\n",root->height);
-	printf("There are %d elements\n",contar_elementos_no(root));
-	for(int i = 500; i<1000;i++){
-		root = deleteNode(root,i);
-	}
+    //deleta valores
+	/*for(int i = 500; i<1000;i++){
+		raiz = deletarNo(raiz,i);
+	}*/
 
-	return 0; 
-} 
+	return 0;
+}
