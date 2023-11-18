@@ -5,6 +5,7 @@
 int quantidade_arvore = 1000;
 int esforco = 0;
 int inseridos = 0;
+int deletados = 0;
 
 struct No 
 { 
@@ -145,9 +146,11 @@ struct No *noValorMinimo(struct No* no)
 {
     struct No* atual = no;
  
-    while (atual->esquerda != NULL)
+    while (atual->esquerda != NULL){
+        esforco++;
         atual = atual->esquerda;
- 
+    }
+
     return atual;
 }
  
@@ -163,8 +166,8 @@ struct No* deletarNo(struct No* raiz, int valor)
     else if( valor > raiz->valor )
         raiz->direita = deletarNo(raiz->direita, valor);
  
-    else
-    {
+    else{
+        deletados++;
         if((raiz->esquerda == NULL) || (raiz->direita == NULL)){
             struct No *temp = raiz->esquerda ? raiz->esquerda : raiz->direita;
  
@@ -230,6 +233,9 @@ int main() {
 
     int caso = 2; //caso 1 -> insercao
                   //caso 2-> remocao
+    
+    printf("1- Insercao\n2- Remocao\n");
+    scanf("%d",&caso);
 
     srand( (unsigned)time(NULL) );
 
@@ -254,14 +260,13 @@ int main() {
 
             }
 
-            //printf("%d elementos, Esforco medio = %.2f\n",quantidade_arvore,esforco_medio/50);
             qtd_elementos[quantidade_arvore/100 - 1] = quantidade_arvore;  
-            esforcos_medios[quantidade_arvore/100 - 1] = esforco_medio/50;
+            esforcos_medios[quantidade_arvore/100 - 1] = esforco_medio/30;
             quantidade_arvore+=100;
         }
 
         //sobreescreve o arquivo avl_inserir.txt todos os valores de qtd de elementos, e esforco medio.
-        FILE *arquivo = fopen("avl_inserir.txt", "w");
+        FILE *arquivo = fopen("avl_insercao.txt", "w");
         for(int i = 0; i<quantidade_arvore/100 - 1; i++){
             printf("%d %.2f\n",qtd_elementos[i],esforcos_medios[i]);
             fprintf(arquivo,"%d %.2f\n",qtd_elementos[i],esforcos_medios[i]);
@@ -272,14 +277,57 @@ int main() {
 
     else if(caso == 2){
 
+         while(quantidade_arvore<10001){
+            
+
+            float esforco_medio = 0;
+        
+            for(int i = 0; i<30;i++){
+
+                //cria arvore
+                struct No *raiz = NULL; 
+                inseridos = 0;
+                int tamanho_da_arvore = 10000;
+                
+                if(quantidade_arvore<9000){
+                    tamanho_da_arvore = quantidade_arvore +10;
+                }
+
+                for(int i = 0; inseridos<tamanho_da_arvore ;i++){
+                    int valor = rand()%tamanho_da_arvore;
+                    raiz = inserir(raiz,valor,NULL);
+                }
+                esforco = 0;
+
+
+                //remove valores aleatórios 
+                for(int i = 0; deletados<quantidade_arvore ;i++){
+                    int valor = rand()%tamanho_da_arvore;
+                    raiz = deletarNo(raiz,valor);
+                }
+
+                esforco_medio+= esforco;
+                esforco = 0;
+                deletados = 0;
+                deletarArvore(raiz);
+
+            }
+
+            qtd_elementos[quantidade_arvore/100 - 1] = quantidade_arvore;  
+            esforcos_medios[quantidade_arvore/100 - 1] = esforco_medio/30;
+            quantidade_arvore+=100;
+         }
+
+
+         //sobreescreve o arquivo avl_remocao.txt todos os valores de qtd de elementos, e esforco medio.
+         FILE *arquivo = fopen("avl_remocao.txt", "w");
+         for(int i = 0; i<quantidade_arvore/100 - 1; i++){
+            printf("%d %.2f\n",qtd_elementos[i],esforcos_medios[i]);
+            fprintf(arquivo,"%d %.2f\n",qtd_elementos[i],esforcos_medios[i]);
+        }
+
+
     }
     
-
-
-    //deleta valores
-	/*for(int i = 500; i<1000;i++){
-		raiz = deletarNo(raiz,i);
-	}*/
-
 	return 0;
 }
