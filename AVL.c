@@ -77,8 +77,7 @@ int getBalance(struct Node *No)
 
 // Recursive function to insert a key in the subtree rooted 
 // with node and returns the new root of the subtree. 
-struct Node* insert(struct Node* node, int key, struct Node* dad) 
-{ 
+struct Node* insert(struct Node* node, int key, struct Node* dad){ 
 
 	if (node == NULL){
 		struct Node* new = newNode(key);
