@@ -28,7 +28,7 @@ def criar_grafico_comparativo(arquivos, labels):
     plt.show()
 
 if __name__ == "__main__":
-    arquivos = ["avl_inserir.txt", "arb.txt", "ab1.txt", "ab2.txt", "ab3.txt"]
+    arquivos = ["avl_insercao.txt", "arbi.txt", "ab1_insercao.txt", "ab2_insercao.txt", "ab3_insercao.txt"]
     labels = ["AVL", "ARB", "AB1", "AB2", "AB3"]
 
     criar_grafico_comparativo(arquivos, labels)
