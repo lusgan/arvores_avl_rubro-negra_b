@@ -200,7 +200,7 @@
 void removeChaveNo(No* no, int chave) {
     // Encontra a posição da chave a ser removida
     int indice = pesquisaBinaria(no, chave);
-    printf("Chave: %d, Índice: %d, Total: %d\n", chave, indice, no->total);
+    //printf("Chave: %d, Índice: %d, Total: %d\n", chave, indice, no->total);
 
     // Se a chave está presente no nó
     if (indice < no->total && no->chaves[indice] == chave) {
@@ -237,13 +237,13 @@ void removeChaveNo(No* no, int chave) {
         removeChaveNo(no->filhos[indice], chave);
     } else {
         // Chave não encontrada na árvore
-        printf("Chave não encontrada na árvore.\n");
+        //printf("Chave não encontrada na árvore.\n");
     }
 }
 
 void removerChaveRecursivo(ArvoreB* ArvoreB, No* no, int chave) {
     if (no == NULL) {
-        printf("Chave não encontrada na árvore.\n");
+        //printf("Chave não encontrada na árvore.\n");
         return;
     }
 
@@ -256,7 +256,7 @@ void removerChaveRecursivo(ArvoreB* ArvoreB, No* no, int chave) {
         cont++;
         removerChaveRecursivo(ArvoreB, no->filhos[indice], chave);
     } else {
-        printf("Chave não encontrada na árvore.\n");
+        //printf("Chave não encontrada na árvore.\n");
         return;
     }
 }
@@ -342,75 +342,177 @@ void mergeNos(ArvoreB* ArvoreB ,No* no, int indice) {
     // Libera a memória do filho direito
     free(filhoDireita);
 }
+    int isThere(int *vet,int size,int key){
+    for(int i = 0;i<size;i++){
+        if(vet[i] == key){
+            return 0;
+        }
+    }
+    return 1;
+    }
 
 void avgcase1() {
-    FILE* fp = fopen("C:\\Users\\leodu\\Downloads\\B\\PerformanceAverageCase1.txt", "w+");
+    FILE* fp = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB1_Insercao.txt", "w+");
+    FILE* fp2 = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB1_remocao.txt", "w+");
     srand(time(NULL));
-
+    double insetions[100];
+    double deletions[100];
     for (int j = 0; j < 10; j += 1) {
+        float delete = 0;
+        float insertion = 0;
+        float stopers = 100;
+        int m = 0;
+        int n = 0;
         ArvoreB* a = criaArvore(1);
-
-        // Insert 10000 random keys
-        for (int i = 0; i < 10; i += 1) {
-            int key = rand() %10;
-            printf("Chave adicionada: %d\n",key);
-            adicionaChave(a, key);
-            fprintf(fp, "%d ", cont);
-            cont = 0;
+        int k = 0;
+        int vet[10000];
+        // Inserir 100 chaves aleatórias
+        while (k < 10000)
+        {
+            int key = rand() %10000;
+            if(isThere(vet,k,key)){
+                adicionaChave(a, key);
+                insertion += cont;
+                vet[k] = key;
+                k++;
+                if(k == stopers ){
+                    insetions[m] += insertion;
+                    m++;
+                    stopers += 100;
+                }
+                cont = 0;
+            }
         }
-
-        // Randomly delete keys
-        fprintf(fp, "Remover: ");
-        for (int i = 0; i<10; i += 1) {
-            int index = rand() %10;
-
+        stopers = 100;
+        // Randomly delete key
+        for (int i = 0; i<=10000; i += 1) {
+            int index = vet[i];
             removerChave(a, index);
-            fprintf(fp, "%d ", cont);
+            delete += cont;
+            if(i == stopers ){
+                deletions[n] += delete;
+                n++;
+                stopers += 100;
+            }
             cont = 0;
         }
-
-        fprintf(fp, "\n");
         free(a);
     }
-
+    for(int i =0;i<100;i++){
+        fprintf(fp,"%d %lf\n",(i+1)*100,insetions[i]/(10));
+        fprintf(fp2,"%d %lf\n",(i+1)*100,deletions[i]/(10));
+    }
     fclose(fp);
+    fclose(fp2);
 }
-    void avgcase5()
-    {
-        FILE *fp = fopen("C:\\Users\\leodu\\Downloads\\B\\PerformanceAverageCase5.txt", "w+");
-        srand(time(NULL));
-        for (int j = 0; j < 10; j += 1)
+void avgcase5() {
+    FILE* fp = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB2_Insercao.txt", "w+");
+    FILE* fp2 = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB2_remocao.txt", "w+");
+    srand(time(NULL));
+    double insetions[100];
+    double deletions[100];
+    for (int j = 0; j < 10; j += 1) {
+        float delete = 0;
+        float insertion = 0;
+        float stopers = 100;
+        int m = 0;
+        int n = 0;
+        ArvoreB* a = criaArvore(5);
+        int k = 0;
+        int vet[10000];
+        // Inserir 100 chaves aleatórias
+        while (k < 10000)
         {
-            ArvoreB *a = criaArvore(5);
-            for (int i = 0; i < 10000; i += 1)
-            {
-                adicionaChave(a, rand());
-                fprintf(fp, "%d ", cont);
+            int key = rand() %10000;
+            if(isThere(vet,k,key)){
+                adicionaChave(a, key);
+                insertion += cont;
+                vet[k] = key;
+                k++;
+                if(k == stopers ){
+                    insetions[m] += insertion;
+                    m++;
+                    stopers += 100;
+                }
                 cont = 0;
             }
-            fprintf(fp,"\n");
-            free(a);
         }
-        fclose(fp);
+        stopers = 100;
+        // Randomly delete key
+        for (int i = 0; i<=10000; i += 1) {
+            int index = vet[i];
+            removerChave(a, index);
+            delete += cont;
+            if(i == stopers ){
+                deletions[n] += delete;
+                n++;
+                stopers += 100;
+            }
+            cont = 0;
+        }
+        free(a);
     }
-    void avgcase10()
-    {
-        FILE *fp = fopen("C:\\Users\\leodu\\Downloads\\B\\PerformanceAverageCase10.txt", "w+");
-        srand(time(NULL));
-        for (int j = 0; j < 10; j += 1)
+    for(int i =0;i<100;i++){
+        fprintf(fp,"%d %lf\n",(i+1)*100,insetions[i]/(10));
+        fprintf(fp2,"%d %lf\n",(i+1)*100,deletions[i]/(10));
+    }
+    fclose(fp);
+    fclose(fp2);
+}
+void avgcase10() {
+    FILE* fp = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB3_Insercao.txt", "w+");
+    FILE* fp2 = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB3_remocao.txt", "w+");
+    srand(time(NULL));
+    double insetions[100];
+    double deletions[100];
+    for (int j = 0; j < 10; j += 1) {
+        float delete = 0;
+        float insertion = 0;
+        float stopers = 100;
+        int m = 0;
+        int n = 0;
+        ArvoreB* a = criaArvore(10);
+        int k = 0;
+        int vet[10000];
+        // Inserir 100 chaves aleatórias
+        while (k < 10000)
         {
-            ArvoreB *a = criaArvore(10);
-            for (int i = 0; i < 10000; i += 1)
-            {
-                adicionaChave(a, rand());
-                fprintf(fp, "%d ", cont);
+            int key = rand() %10000;
+            if(isThere(vet,k,key)){
+                adicionaChave(a, key);
+                insertion += cont;
+                vet[k] = key;
+                k++;
+                if(k == stopers ){
+                    insetions[m] += insertion;
+                    m++;
+                    stopers += 100;
+                }
                 cont = 0;
             }
-            fprintf(fp,"\n");
-            free(a);
         }
-        fclose(fp);
+        stopers = 100;
+        // Randomly delete key
+        for (int i = 0; i<=10000; i += 1) {
+            int index = vet[i];
+            removerChave(a, index);
+            delete += cont;
+            if(i == stopers ){
+                deletions[n] += delete;
+                n++;
+                stopers += 100;
+            }
+            cont = 0;
+        }
+        free(a);
     }
+    for(int i =0;i<100;i++){
+        fprintf(fp,"%d %lf\n",(i+1)*100,insetions[i]/(10));
+        fprintf(fp2,"%d %lf\n",(i+1)*100,deletions[i]/(10));
+    }
+    fclose(fp);
+    fclose(fp2);
+}
 
     int main() {
         avgcase1();
