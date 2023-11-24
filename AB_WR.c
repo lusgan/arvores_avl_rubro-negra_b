@@ -58,10 +58,12 @@
 
     void percorreArvore(No* no) {
         if (no != NULL) {
+            cont++;
             for (int i = 0; i < no->total; i++){
                 percorreArvore(no->filhos[i]); //visita o filho a esquerda
                 
                 printf("%d ",no->chaves[i]);
+                cont++;
             }
 
             percorreArvore(no->filhos[no->total]); //visita ultimo filho (direita)
@@ -77,10 +79,13 @@
             meio = (inicio + fim) / 2;
             
             if (no->chaves[meio] == chave) {	
+                cont++;
                 return meio; //encontrou	
             } else if (no->chaves[meio] > chave) {
+                cont++;
                     fim	= meio - 1;	
             } else {
+                cont++;
                 inicio = meio + 1;
             }
         }
@@ -95,8 +100,10 @@
             int i = pesquisaBinaria(no, chave);
 
             if (i < no->total && no->chaves[i] == chave) {
+                cont++;
                 return 1; //encontrou
             } else {
+                cont++;
                 no = no->filhos[i];
             }
         }
@@ -108,13 +115,16 @@
         No *no = ArvoreB->raiz;
         
         while (no != NULL) {
-
+            cont++;
             int i = pesquisaBinaria(no, chave);
 
             if (no->filhos[i] == NULL)
-                return no; //encontrou nó
-            else
+{                cont++;
+                return no;} //encontrou nó
+            else{
+                cont++;
                 no = no->filhos[i];
+            }
         }
 
         return NULL; //não encontrou nenhum nó
@@ -150,10 +160,11 @@
         cont++;
         
         for (int i = meio + 1; i < no->total; i++) {
+            cont++;
             novo->filhos[novo->total] = no->filhos[i];
             novo->chaves[novo->total] = no->chaves[i];
             if (novo->filhos[novo->total] != NULL) novo->filhos[novo->total]->pai = novo;
-            
+            cont++;
             novo->total++;
         }
 
@@ -182,8 +193,10 @@
                 no->pai = pai;
                 novo->pai = pai;
                 ArvoreB->raiz = pai;
-            } else
+            } else{
+            cont++;
                 adicionaChaveRecursivo(ArvoreB, no->pai, novo, promovido);
+            }
         }
     }
 
@@ -209,6 +222,7 @@ void removeChaveNo(No* no, int chave) {
         if (no->filhos[indice] == NULL) {
             // Move todas as chaves à direita da chave removida para a esquerda
             for (int i = indice; i < no->total - 1; i++) {
+                cont++;
                 no->chaves[i] = no->chaves[i + 1];
                 no->filhos[i + 1] = no->filhos[i + 2];
             }
@@ -223,6 +237,7 @@ void removeChaveNo(No* no, int chave) {
 
             // Encontra o menor valor na subárvore direita (sucessor)
             while (sucessor->filhos[0] != NULL) {
+                cont++;
                 sucessor = sucessor->filhos[0];
             }
 
@@ -233,9 +248,11 @@ void removeChaveNo(No* no, int chave) {
             removeChaveNo(sucessor, sucessor->chaves[0]);
         }
     } else if (no->filhos[indice] != NULL) {
+        cont++;
         // Se a chave não está no nó, mas o filho correspondente pode conter a chave
         removeChaveNo(no->filhos[indice], chave);
     } else {
+        cont++;
         // Chave não encontrada na árvore
         //printf("Chave não encontrada na árvore.\n");
     }
@@ -250,12 +267,13 @@ void removerChaveRecursivo(ArvoreB* ArvoreB, No* no, int chave) {
     int indice = pesquisaBinaria(no, chave);
 
     if (indice < no->total && no->chaves[indice] == chave) {
-        cont++;
+        cont+=2;
         removeChaveNo(no, chave);
     } else if (no->filhos[indice] != NULL) {
         cont++;
         removerChaveRecursivo(ArvoreB, no->filhos[indice], chave);
     } else {
+        cont++;
         //printf("Chave não encontrada na árvore.\n");
         return;
     }
@@ -289,7 +307,7 @@ void rearranjaNo(ArvoreB* ArvoreB ,No* no, int indice) {
     }
     // Tenta redistribuir uma chave do filho esquerdo
     else if (indice > 0 && filhoEsquerda->total > ArvoreB->ordem) {
-        cont++;
+        cont+= 2;
         // Move a chave pai para o nó atual
         no->chaves[indice - 1] = filhoEsquerda->chaves[filhoEsquerda->total - 1];
 
@@ -304,10 +322,12 @@ void rearranjaNo(ArvoreB* ArvoreB ,No* no, int indice) {
     }
     // Fusão com o filho direito
     else if (indice < no->total) {
+        cont++;
         mergeNos(ArvoreB,no, indice);
     }
     // Fusão com o filho esquerdo
     else {
+        cont++;
         mergeNos(ArvoreB,no, indice - 1);
     }
 }
@@ -352,8 +372,8 @@ void mergeNos(ArvoreB* ArvoreB ,No* no, int indice) {
     }
 
 void avgcase1() {
-    FILE* fp = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB1_Insercao.txt", "w+");
-    FILE* fp2 = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB1_remocao.txt", "w+");
+    FILE* fp = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB1_Insercao.txt", "w+");
+    FILE* fp2 = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB1_remocao.txt", "w+");
     srand(time(NULL));
     double insetions[100];
     double deletions[100];
@@ -369,9 +389,11 @@ void avgcase1() {
         // Inserir 100 chaves aleatórias
         while (k < 10000)
         {
+            cont++;
             int key = rand() %10000;
             if(isThere(vet,k,key)){
                 adicionaChave(a, key);
+                cont++;
                 insertion += cont;
                 vet[k] = key;
                 k++;
@@ -406,8 +428,8 @@ void avgcase1() {
     fclose(fp2);
 }
 void avgcase5() {
-    FILE* fp = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB2_Insercao.txt", "w+");
-    FILE* fp2 = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB2_remocao.txt", "w+");
+    FILE* fp = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB2_Insercao.txt", "w+");
+    FILE* fp2 = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB2_remocao.txt", "w+");
     srand(time(NULL));
     double insetions[100];
     double deletions[100];
@@ -423,9 +445,11 @@ void avgcase5() {
         // Inserir 100 chaves aleatórias
         while (k < 10000)
         {
+            cont++;
             int key = rand() %10000;
             if(isThere(vet,k,key)){
                 adicionaChave(a, key);
+                cont++;
                 insertion += cont;
                 vet[k] = key;
                 k++;
@@ -460,8 +484,8 @@ void avgcase5() {
     fclose(fp2);
 }
 void avgcase10() {
-    FILE* fp = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB3_Insercao.txt", "w+");
-    FILE* fp2 = fopen("C:\\Users\\Avell\\Downloads\\ArvoreB\\AB3_remocao.txt", "w+");
+    FILE* fp = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB3_Insercao.txt", "w+");
+    FILE* fp2 = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB3_remocao.txt", "w+");
     srand(time(NULL));
     double insetions[100];
     double deletions[100];
@@ -477,9 +501,11 @@ void avgcase10() {
         // Inserir 100 chaves aleatórias
         while (k < 10000)
         {
+            cont++;
             int key = rand() %10000;
             if(isThere(vet,k,key)){
                 adicionaChave(a, key);
+                cont++;
                 insertion += cont;
                 vet[k] = key;
                 k++;
