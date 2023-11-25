@@ -83,7 +83,6 @@ int main(int argc, char *argv[]) {
             random_num(random_numeros);
             for (i = 0; i < arvore_quant; i++) {
                 remover(arvore, numeros[i]);
-                cont_remove++;
             }
 
             // printf("\nArvore rubro-negra apos remocao:\n");
