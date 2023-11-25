@@ -29,7 +29,8 @@ int maximo(int a, int b)
 } 
 
 struct No* novoNo(int valor) 
-{ 
+{
+     esforco++;
 	struct No* no = (struct No*)malloc(sizeof(struct No)); 
 	no->valor = valor;
 	no->pai = NULL; 
@@ -71,8 +72,11 @@ struct No *rotacaoEsquerda(struct No *a)
 
 int fb(struct No *no)
 { 
-	if (no == NULL) 
-		return 0; 
+	if (no == NULL){
+        esforco++; 
+		return 0;
+    }
+    esforco++; 
 	return altura(no->esquerda) - altura(no->direita); 
 } 
 
@@ -83,17 +87,24 @@ struct No* inserir(struct No* no, int valor, struct No* pai){ //busca recursivam
 		struct No* novo = novoNo(valor);
 		novo->pai = pai;
         inseridos++;
+        esforco++;
 		return novo;
 	}
 
-	if (valor < no->valor) 
+	if (valor < no->valor){
+        esforco++; 
 		no->esquerda = inserir(no->esquerda, valor, no);
+    }
 
-	else if (valor > no->valor) 
+	else if (valor > no->valor){
+        esforco++; 
 		no->direita = inserir(no->direita, valor, no);
+    }
 
-	else//valor passado ja existente na arvore
-		return no; 
+	else{//valor passado ja existente na arvore
+        esforco++;
+		return no;
+    } 
 
 
 	no->altura = 1 + maximo(altura(no->esquerda),altura(no->direita)); 
@@ -101,16 +112,19 @@ struct No* inserir(struct No* no, int valor, struct No* pai){ //busca recursivam
 	int fator_balanceamento = fb(no); 
 
     //RD
-	if (fator_balanceamento > 1 && valor < no->esquerda->valor) 
+	if (fator_balanceamento > 1 && valor < no->esquerda->valor){
+        esforco++; 
 		return rotacaoDireita(no); 
-
+    }
     //RE
-	if (fator_balanceamento < -1 && valor > no->direita->valor) 
+	if (fator_balanceamento < -1 && valor > no->direita->valor){
+        esforco++;
 		return rotacaoEsquerda(no); 
-
+    }
     //RDD
 	if (fator_balanceamento > 1 && valor > no->esquerda->valor) 
 	{ 
+        esforco++;
 		no->esquerda = rotacaoEsquerda(no->esquerda); 
 		return rotacaoDireita(no); 
 	} 
@@ -118,6 +132,7 @@ struct No* inserir(struct No* no, int valor, struct No* pai){ //busca recursivam
     //RDE
 	if (fator_balanceamento < -1 && valor < no->direita->valor) 
 	{ 
+        esforco++;
 		no->direita = rotacaoDireita(no->direita); 
 		return rotacaoEsquerda(no); 
 	} 
@@ -145,7 +160,7 @@ int contarElementosNo(struct No* no) {
 struct No *noValorMinimo(struct No* no)
 {
     struct No* atual = no;
- 
+    esforco++;
     while (atual->esquerda != NULL){
         esforco++;
         atual = atual->esquerda;
@@ -157,55 +172,75 @@ struct No *noValorMinimo(struct No* no)
 struct No* deletarNo(struct No* raiz, int valor)
 {
     esforco++;
-    if (raiz == NULL)
+    if (raiz == NULL){
+        esforco++;
         return raiz;
- 
-    if ( valor < raiz->valor )
+    }
+
+    if ( valor < raiz->valor ){
+        esforco++;
         raiz->esquerda = deletarNo(raiz->esquerda, valor);
- 
-    else if( valor > raiz->valor )
+    }
+
+    else if( valor > raiz->valor ){
+        esforco++;
         raiz->direita = deletarNo(raiz->direita, valor);
- 
+    }
+
     else{
         deletados++;
+        esforco++;
         if((raiz->esquerda == NULL) || (raiz->direita == NULL)){
+            esforco++;
             struct No *temp = raiz->esquerda ? raiz->esquerda : raiz->direita;
  
             if (temp == NULL){
+                esforco++;
                 temp = raiz;
                 raiz = NULL;
             }
-            else
-             *raiz = *temp; 
+            else{
+             esforco++;
+             *raiz = *temp;
+            } 
      
             free(temp);
         }
 
         else{
+            esforco++;
             struct No* temp = noValorMinimo(raiz->direita);
             raiz->valor = temp->valor;
             raiz->direita = deletarNo(raiz->direita, temp->valor);
         }
     }
  
-    if (raiz == NULL)
+    if (raiz == NULL){
+      esforco++;
       return raiz;
+    }
  
     raiz->altura = 1 + maximo(altura(raiz->esquerda),altura(raiz->direita));
 
     int fator_balanceamento = fb(raiz); 
-    if (fator_balanceamento > 1 && fb(raiz->esquerda) >= 0)
+    if (fator_balanceamento > 1 && fb(raiz->esquerda) >= 0){
+        esforco++;
         return rotacaoDireita(raiz);
- 
+    }
+
     if (fator_balanceamento > 1 && fb(raiz->esquerda) < 0){
+        esforco++;
         raiz->esquerda =  rotacaoEsquerda(raiz->esquerda);
         return rotacaoDireita(raiz);
     }
  
-    if (fator_balanceamento < -1 && fb(raiz->direita) <= 0)
+    if (fator_balanceamento < -1 && fb(raiz->direita) <= 0){
+        esforco++;
         return rotacaoEsquerda(raiz);
- 
+    }
+
     if (fator_balanceamento < -1 && fb(raiz->direita) > 0){
+        esforco++;
         raiz->direita = rotacaoDireita(raiz->direita);
         return rotacaoEsquerda(raiz);
     }
@@ -214,7 +249,9 @@ struct No* deletarNo(struct No* raiz, int valor)
 }
 
 void deletarArvore(struct No *raiz) {
+    esforco++;
     if (raiz == NULL) {
+        esforco++;
         return;
     }
 

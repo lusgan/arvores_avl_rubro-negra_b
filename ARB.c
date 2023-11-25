@@ -38,20 +38,20 @@ int altura(No* no);
 void random_num(int numeros[]);
 
 int main(int argc, char *argv[]) {
-    FILE *arquivo1 = fopen("arb_insercao.txt", "w");
+    FILE *arquivo1 = fopen("arbi.txt", "w");
     if (arquivo1 == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
     }
 
-    FILE *arquivo2 = fopen("arb_remocao.txt", "w");
+    FILE *arquivo2 = fopen("arbr.txt", "w");
     if (arquivo2 == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
     }
     
-    float custo_medio_insercao = 0;
-    float custo_medio_remocao = 0;
+    int custo_medio_insercao = 0;
+    int custo_medio_remocao = 0;
 
     int c = 0;
     int r = 0;
@@ -74,17 +74,19 @@ int main(int argc, char *argv[]) {
                 inserir(arvore, numeros[i]);
                 cont_insere++;
             }
+            custo_medio_insercao += cont_insere;
 
             // printf("\nArvore rubro-negra com %d elementos:\n", arvore_quant);
             // exibir_pre_order(arvore->raiz);
             // printf("\nAltura: %d\n\n", altura(arvore->raiz));
-            printf("Custo de insercao: %d\n", cont_insere);
+            printf("Custo de insercao: %d\ncusto medio = %d\n", cont_insere,custo_medio_insercao);
 
             random_num(random_numeros);
             for (i = 0; i < arvore_quant; i++) {
                 remover(arvore, numeros[i]);
+                cont_remove++;
             }
-
+            custo_medio_remocao += cont_remove;
             // printf("\nArvore rubro-negra apos remocao:\n");
             // exibir_pre_order(arvore->raiz);
             // printf("\nAltura: %d\n\n", altura(arvore->raiz));
@@ -92,8 +94,8 @@ int main(int argc, char *argv[]) {
 
             printf("\n");
 
-            custo_medio_insercao += cont_insere;
-            custo_medio_remocao += cont_remove;
+            //custo_medio_insercao += cont_insere;
+            //custo_medio_remocao += cont_remove;
 
             cont_insere = 0;
             cont_remove = 0;
@@ -104,15 +106,18 @@ int main(int argc, char *argv[]) {
         printf("Custo medio de insercao: %.2f\n", (custo_medio_insercao) / 10.0);
         printf("Custo medio de remocao: %.2f\n", (custo_medio_remocao) / 10.0);
 
-        FILE *arquivo1 = fopen("arb_insercao.txt", "a");
+        FILE *arquivo1 = fopen("arbi.txt", "a");
         fprintf(arquivo1, "%d %.2f\n", arvore_quant, custo_medio_insercao / 10.0);
         fclose(arquivo1);
 
-        FILE *arquivo2 = fopen("arb_remocao.txt", "a");
+        FILE *arquivo2 = fopen("arbr.txt", "a");
         fprintf(arquivo2, "%d %.2f\n", arvore_quant, custo_medio_remocao / 10.0);
         fclose(arquivo2);
 
         arvore_quant += 100;
+
+        custo_medio_insercao = 0;
+        custo_medio_remocao = 0;
 
         printf("\n");
     }
