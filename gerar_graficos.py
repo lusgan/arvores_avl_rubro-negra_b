@@ -28,10 +28,10 @@ def criar_grafico_comparativo(arquivos, labels, tarefa, tamanho_y):
     plt.show()
 
 if __name__ == "__main__":
-    arquivosAdicao = ["avl_insercao.txt", "arbi.txt", "ab1_insercao.txt", "ab2_insercao.txt", "ab3_insercao.txt"]
+    arquivosAdicao = ["avl_insercao.txt", "arb_insercao.txt", "AB1_Insercao.txt", "AB2_Insercao.txt", "AB3_Insercao.txt"]
     labels = ["AVL", "ARB", "AB1", "AB2", "AB3"]
 
     criar_grafico_comparativo(arquivosAdicao, labels, "Inserção",4000000)
     
-    arquivosRemocao = ["avl_remocao.txt", "arbr.txt", "ab1_remocao.txt", "ab2_remocao.txt", "ab3_remocao.txt"]
+    arquivosRemocao = ["avl_remocao.txt", "arb_remocao.txt", "AB1_remocao.txt", "AB2_remocao.txt", "AB3_remocao.txt"]
     criar_grafico_comparativo(arquivosRemocao, labels, "Remoção",1000000)

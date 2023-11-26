@@ -38,13 +38,13 @@ int altura(No* no);
 void random_num(int numeros[]);
 
 int main(int argc, char *argv[]) {
-    FILE *arquivo1 = fopen("arbi.txt", "w");
+    FILE *arquivo1 = fopen("arb_insercao.txt", "w");
     if (arquivo1 == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
     }
 
-    FILE *arquivo2 = fopen("arbr.txt", "w");
+    FILE *arquivo2 = fopen("arb_remocao.txt", "w");
     if (arquivo2 == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
@@ -67,6 +67,7 @@ int main(int argc, char *argv[]) {
             random_num(random_numeros);
 
             Arvore *arvore = inicializar_arvore();
+            cont_insere++;
 
             No *numeros[arvore_quant];  
             for (i = 0; i < arvore_quant; i++) {
@@ -84,7 +85,6 @@ int main(int argc, char *argv[]) {
             random_num(random_numeros);
             for (i = 0; i < arvore_quant; i++) {
                 remover(arvore, numeros[i]);
-                cont_remove++;
             }
             custo_medio_remocao += cont_remove;
             // printf("\nArvore rubro-negra apos remocao:\n");
@@ -106,11 +106,11 @@ int main(int argc, char *argv[]) {
         printf("Custo medio de insercao: %.2f\n", (custo_medio_insercao) / 10.0);
         printf("Custo medio de remocao: %.2f\n", (custo_medio_remocao) / 10.0);
 
-        FILE *arquivo1 = fopen("arbi.txt", "a");
+        FILE *arquivo1 = fopen("arb_insercao.txt", "a");
         fprintf(arquivo1, "%d %.2f\n", arvore_quant, custo_medio_insercao / 10.0);
         fclose(arquivo1);
 
-        FILE *arquivo2 = fopen("arbr.txt", "a");
+        FILE *arquivo2 = fopen("arb_remocao.txt", "a");
         fprintf(arquivo2, "%d %.2f\n", arvore_quant, custo_medio_remocao / 10.0);
         fclose(arquivo2);
 
