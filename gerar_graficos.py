@@ -24,8 +24,7 @@ def criar_grafico_comparativo(arquivos, labels, tarefa, tamanho_y, nome_arquivo)
     plt.ylabel('Esforço Computacional Médio')
     plt.grid(True)
     plt.legend()
-    plt.ylim(50, tamanho_y)  # Limita o eixo y entre 50 e tamanho_y
-    plt.gca().invert_yaxis()  # Inverte o eixo Y
+    plt.ylim(0, 50)
     plt.savefig(nome_arquivo)
     plt.show()
 
