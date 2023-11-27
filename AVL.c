@@ -286,6 +286,11 @@ int main() {
                 //insere valores aleatórios
                 struct No *raiz = NULL; 
                 for(int i = 0; inseridos<quantidade_arvore ;i++){
+                    
+                    if(inseridos == quantidade_arvore - 1){
+                        esforco = 0;
+                    }
+                    
                     int valor = rand()%quantidade_arvore;
                     raiz = inserir(raiz,valor,NULL);
                 }
@@ -336,13 +341,11 @@ int main() {
                 }
                 esforco = 0;
 
+                //Deleta um valor aleatorio
+                int valor = rand()%tamanho_da_arvore;
+                raiz = deletarNo(raiz,valor);
 
-                //remove valores aleatórios 
-                for(int i = 0; deletados<quantidade_arvore ;i++){
-                    int valor = rand()%tamanho_da_arvore;
-                    raiz = deletarNo(raiz,valor);
-                }
-
+                
                 esforco_medio+= esforco;
                 esforco = 0;
                 deletados = 0;
