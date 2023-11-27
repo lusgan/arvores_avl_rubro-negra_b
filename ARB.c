@@ -3,9 +3,9 @@
 #include <time.h>
 #include <unistd.h>
 
-int arvore_quant = 100;
-int cont_insere = 0;
-int cont_remove = 0;
+int arvore_quant = 100; // incrementa de 100 em 100 ate chegar em 10000 nos
+int cont_insere = 0; // contabiliza o custo de insercao da operacao
+int cont_remove = 0; // contabiliza o custo de remocao da operacao
 
 enum coloracao {Vermelho, Preto};
 typedef enum coloracao Cor;
@@ -53,40 +53,48 @@ int main(int argc, char *argv[]) {
     int custo_medio_insercao = 0;
     int custo_medio_remocao = 0;
 
-    int c = 0;
-    int r = 0;
-    int i = 0;
+    int r = 0; // iterar por todas as 10 repeticoes para fazer a media
+    int i = 0; // iterador padrao dos demais loops
 
-    for (c = 0; c < 100; c++) {
-        printf("Caso %d\n", c);
-        for (r = 0; r < 10; r++) {
+    srand((unsigned)time(NULL));
+
+    while (arvore_quant < 10001) {
+        printf("Caso %d\n", arvore_quant);
+        for (r = 0; r < 50; r++) {
             printf("Iteracao: %d\n", r);
+
             int random_numeros[arvore_quant]; // geracao de array com numeros "aleatorios" de 1 ate arvore_quant
             for (i = 0; i < arvore_quant; i++)
                 random_numeros[i] = i + 1;
             random_num(random_numeros);
 
             Arvore *arvore = inicializar_arvore();
-            cont_insere++;
 
             No *numeros[arvore_quant];  
             for (i = 0; i < arvore_quant; i++) {
                 numeros[i] = criar_no(random_numeros[i]);
                 inserir(arvore, numeros[i]);
-                cont_insere++;
+
+                if (i != arvore_quant - 1)
+                    cont_insere = 0;
             }
+
             custo_medio_insercao += cont_insere;
 
             // printf("\nArvore rubro-negra com %d elementos:\n", arvore_quant);
             // exibir_pre_order(arvore->raiz);
             // printf("\nAltura: %d\n\n", altura(arvore->raiz));
-            printf("Custo de insercao: %d\ncusto medio = %d\n", cont_insere,custo_medio_insercao);
+            printf("Custo de insercao: %d\n", cont_insere);
 
             random_num(random_numeros);
             for (i = 0; i < arvore_quant; i++) {
                 remover(arvore, numeros[i]);
+
+                if (i != arvore_quant - 1)
+                    cont_remove = 0;
             }
             custo_medio_remocao += cont_remove;
+
             // printf("\nArvore rubro-negra apos remocao:\n");
             // exibir_pre_order(arvore->raiz);
             // printf("\nAltura: %d\n\n", altura(arvore->raiz));
@@ -94,13 +102,8 @@ int main(int argc, char *argv[]) {
 
             printf("\n");
 
-            //custo_medio_insercao += cont_insere;
-            //custo_medio_remocao += cont_remove;
-
             cont_insere = 0;
             cont_remove = 0;
-
-            sleep(1);
         }
 
         printf("Custo medio de insercao: %.2f\n", (custo_medio_insercao) / 10.0);
@@ -559,8 +562,6 @@ int altura(No* no){
 }
 
 void random_num(int numeros[]) {
-    srand(time(NULL));
-
     for (int i = 0; i < arvore_quant; i++) {
         int troca = rand() % arvore_quant;
         int aux = numeros[i];
