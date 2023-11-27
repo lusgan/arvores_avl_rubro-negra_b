@@ -58,11 +58,13 @@ int main(int argc, char *argv[]) {
     int r = 0; // iterar por todas as 10 repeticoes para fazer a media
     int i = 0; // iterador padrao dos demais loops
 
+    float num_repeticoes = 100.0; // numero de repeticoes para gerar as medias
+
     srand((unsigned)time(NULL));
 
     while (arvore_quant < 10001) {
         printf("Caso %d\n", arvore_quant);
-        for (r = 0; r < 50; r++) {
+        for (r = 0; r < 100; r++) {
             printf("Iteracao: %d\n", r);
 
             int random_numeros[arvore_quant]; // geracao de array com numeros "aleatorios" de 1 ate arvore_quant
@@ -90,11 +92,6 @@ int main(int argc, char *argv[]) {
             custo_medio_remocao += cont_remove;
 
             printf("Custo de remocao: %d\n", cont_remove);
-            for (i = 1; i < arvore_quant; i++) { // zera a arvore inteira para realizar a proxima insercao
-                remover(arvore, numeros[i]);
-
-                cont_remove = 0;
-            }
 
             printf("\n");
 
@@ -102,15 +99,15 @@ int main(int argc, char *argv[]) {
             cont_remove = 0;
         }
 
-        printf("Custo medio de insercao: %.2f\n", (custo_medio_insercao) / 50.0);
-        printf("Custo medio de remocao: %.2f\n", (custo_medio_remocao) / 50.0);
+        printf("Custo medio de insercao: %.2f\n", (custo_medio_insercao) / num_repeticoes);
+        printf("Custo medio de remocao: %.2f\n", (custo_medio_remocao) / num_repeticoes);
 
         FILE *arquivo1 = fopen("arb_insercao.txt", "a");
-        fprintf(arquivo1, "%d %.2f\n", arvore_quant, custo_medio_insercao / 50.0);
+        fprintf(arquivo1, "%d %.2f\n", arvore_quant, custo_medio_insercao / num_repeticoes);
         fclose(arquivo1);
 
         FILE *arquivo2 = fopen("arb_remocao.txt", "a");
-        fprintf(arquivo2, "%d %.2f\n", arvore_quant, custo_medio_remocao / 50.0);
+        fprintf(arquivo2, "%d %.2f\n", arvore_quant, custo_medio_remocao / num_repeticoes);
         fclose(arquivo2);
 
         arvore_quant += 100;
@@ -573,14 +570,4 @@ void shuffle_nos(No *numeros[]) {
         numeros[i] = numeros[troca];
         numeros[troca] = aux;
     }
-}
-
-No* buscar_valor(No* no, int valor) {
-    if (no == NULL || no->valor == valor)
-        return no;
-
-    if (valor < no->valor)
-        return buscar_valor(no->esquerda, valor);
-    else
-        return buscar_valor(no->direita, valor);
 }
