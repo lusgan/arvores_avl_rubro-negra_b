@@ -35,7 +35,9 @@ void balancear_remocao(Arvore *arvore, No *no);
 void remover(Arvore *arvore, No *no);
 void exibir_pre_order(No* no);
 int altura(No* no);
-void random_num(int numeros[]);
+void shuffle_num(int numeros[]);
+void shuffle_nos(No *numeros[]);
+No* buscar_valor(No* no, int valor);
 
 int main(int argc, char *argv[]) {
     FILE *arquivo1 = fopen("arb_insercao.txt", "w");
@@ -66,7 +68,7 @@ int main(int argc, char *argv[]) {
             int random_numeros[arvore_quant]; // geracao de array com numeros "aleatorios" de 1 ate arvore_quant
             for (i = 0; i < arvore_quant; i++)
                 random_numeros[i] = i + 1;
-            random_num(random_numeros);
+            shuffle_num(random_numeros);
 
             Arvore *arvore = inicializar_arvore();
 
@@ -81,24 +83,18 @@ int main(int argc, char *argv[]) {
 
             custo_medio_insercao += cont_insere;
 
-            // printf("\nArvore rubro-negra com %d elementos:\n", arvore_quant);
-            // exibir_pre_order(arvore->raiz);
-            // printf("\nAltura: %d\n\n", altura(arvore->raiz));
             printf("Custo de insercao: %d\n", cont_insere);
 
-            random_num(random_numeros);
-            for (i = 0; i < arvore_quant; i++) {
-                remover(arvore, numeros[i]);
-
-                if (i != arvore_quant - 1)
-                    cont_remove = 0;
-            }
+            shuffle_nos(numeros);
+            remover(arvore, numeros[0]);
             custo_medio_remocao += cont_remove;
 
-            // printf("\nArvore rubro-negra apos remocao:\n");
-            // exibir_pre_order(arvore->raiz);
-            // printf("\nAltura: %d\n\n", altura(arvore->raiz));
             printf("Custo de remocao: %d\n", cont_remove);
+            for (i = 1; i < arvore_quant; i++) { // zera a arvore inteira para realizar a proxima insercao
+                remover(arvore, numeros[i]);
+
+                cont_remove = 0;
+            }
 
             printf("\n");
 
@@ -106,15 +102,15 @@ int main(int argc, char *argv[]) {
             cont_remove = 0;
         }
 
-        printf("Custo medio de insercao: %.2f\n", (custo_medio_insercao) / 10.0);
-        printf("Custo medio de remocao: %.2f\n", (custo_medio_remocao) / 10.0);
+        printf("Custo medio de insercao: %.2f\n", (custo_medio_insercao) / 50.0);
+        printf("Custo medio de remocao: %.2f\n", (custo_medio_remocao) / 50.0);
 
         FILE *arquivo1 = fopen("arb_insercao.txt", "a");
-        fprintf(arquivo1, "%d %.2f\n", arvore_quant, custo_medio_insercao / 10.0);
+        fprintf(arquivo1, "%d %.2f\n", arvore_quant, custo_medio_insercao / 50.0);
         fclose(arquivo1);
 
         FILE *arquivo2 = fopen("arb_remocao.txt", "a");
-        fprintf(arquivo2, "%d %.2f\n", arvore_quant, custo_medio_remocao / 10.0);
+        fprintf(arquivo2, "%d %.2f\n", arvore_quant, custo_medio_remocao / 50.0);
         fclose(arquivo2);
 
         arvore_quant += 100;
@@ -561,11 +557,30 @@ int altura(No* no){
     return esquerda > direita ? esquerda : direita;
 }
 
-void random_num(int numeros[]) {
+void shuffle_num(int numeros[]) {
     for (int i = 0; i < arvore_quant; i++) {
         int troca = rand() % arvore_quant;
         int aux = numeros[i];
         numeros[i] = numeros[troca];
         numeros[troca] = aux;
     }
+}
+
+void shuffle_nos(No *numeros[]) {
+    for (int i = 0; i < arvore_quant; i++) {
+        int troca = rand() % arvore_quant;
+        No *aux = numeros[i];
+        numeros[i] = numeros[troca];
+        numeros[troca] = aux;
+    }
+}
+
+No* buscar_valor(No* no, int valor) {
+    if (no == NULL || no->valor == valor)
+        return no;
+
+    if (valor < no->valor)
+        return buscar_valor(no->esquerda, valor);
+    else
+        return buscar_valor(no->direita, valor);
 }

@@ -12,8 +12,8 @@ def ler_arquivo(nome_arquivo):
     
     return dados
 
-def criar_grafico_comparativo(arquivos, labels, tarefa, tamanho_y):
-    plt.figure(figsize=(10,6))
+def criar_grafico_comparativo(arquivos, labels, tarefa, tamanho_y, nome_arquivo):
+    plt.figure(figsize=(10, 6))
     
     for i, arquivo in enumerate(arquivos):
         dados = ler_arquivo(arquivo)
@@ -24,14 +24,16 @@ def criar_grafico_comparativo(arquivos, labels, tarefa, tamanho_y):
     plt.ylabel('Esforço Computacional Médio')
     plt.grid(True)
     plt.legend()
-    plt.ylim(28000, tamanho_y)  # Limita o eixo y entre 28000 e 1900000
+    plt.ylim(50, tamanho_y)  # Limita o eixo y entre 50 e tamanho_y
+    plt.gca().invert_yaxis()  # Inverte o eixo Y
+    plt.savefig(nome_arquivo)
     plt.show()
 
 if __name__ == "__main__":
-    arquivosAdicao = ["avl_insercao.txt", "arb_insercao.txt", "AB1_Insercao.txt", "AB2_Insercao.txt", "AB3_Insercao.txt"]
-    labels = ["AVL", "ARB", "AB1", "AB2", "AB3"]
+    arquivosAdicao = ["avl_insercao.txt", "arb_insercao.txt"]
+    labels = ["AVL", "ARB"]
 
-    criar_grafico_comparativo(arquivosAdicao, labels, "Inserção",4000000)
+    criar_grafico_comparativo(arquivosAdicao, labels, "Inserção", 0, "insercao.png")
     
-    arquivosRemocao = ["avl_remocao.txt", "arb_remocao.txt", "AB1_remocao.txt", "AB2_remocao.txt", "AB3_remocao.txt"]
-    criar_grafico_comparativo(arquivosRemocao, labels, "Remoção",1000000)
+    arquivosRemocao = ["avl_remocao.txt", "arb_remocao.txt"]
+    criar_grafico_comparativo(arquivosRemocao, labels, "Remoção", 0, "remocao.png")
