@@ -7,8 +7,8 @@ int arvore_quant = 100; // incrementa de 100 em 100 ate chegar em 10000 nos
 int cont_insere = 0; // contabiliza o custo de insercao da operacao
 int cont_remove = 0; // contabiliza o custo de remocao da operacao
 
-enum coloracao {Vermelho, Preto};
-typedef enum coloracao Cor;
+enum coracao {Vermelho, Preto};
+typedef enum coracao Cor;
 
 typedef struct no {
     struct no* pai;
@@ -36,8 +36,31 @@ void remover(Arvore *arvore, No *no);
 void exibir_pre_order(No* no);
 int altura(No* no);
 void shuffle_num(int numeros[]);
-void shuffle_nos(No *numeros[]);
-No* buscar_valor(No* no, int valor);
+
+No* search(No* raiz, int valor) {
+    // Se o nó atual for nulo ou a chave for igual ao valor do nó, retorne o nó
+    if (raiz == NULL || raiz->valor == valor)
+        return raiz;
+
+    // Se a chave for menor que o valor do nó, faça a busca na subárvore esquerda
+    if (valor < raiz->valor)
+        return search(raiz->esquerda, valor);
+
+    // Caso contrário, faça a busca na subárvore direita
+    return search(raiz->direita, valor);
+}
+
+int countNodes(Arvore* arvore, No* root) {
+    if (root == NULL) {
+        return 0;
+    }
+
+    // Conta o nó atual e recursivamente conta os nós nas subárvores esquerda e direita
+    if (root == arvore->nulo)
+        return 0 + countNodes(arvore, root->esquerda) + countNodes(arvore, root->direita);
+    else
+        return 1 + countNodes(arvore, root->esquerda) + countNodes(arvore, root->direita);
+}
 
 int main(int argc, char *argv[]) {
     FILE *arquivo1 = fopen("arb_insercao.txt", "w");
@@ -76,19 +99,19 @@ int main(int argc, char *argv[]) {
 
             No *numeros[arvore_quant];  
             for (i = 0; i < arvore_quant; i++) {
+                if (i == arvore_quant - 1)
+                    cont_insere = 0;
+
                 numeros[i] = criar_no(random_numeros[i]);
                 inserir(arvore, numeros[i]);
-
-                if (i != arvore_quant - 1)
-                    cont_insere = 0;
             }
 
             custo_medio_insercao += cont_insere;
 
             printf("Custo de insercao: %d\n", cont_insere);
 
-            shuffle_nos(numeros);
             remover(arvore, numeros[0]);
+
             custo_medio_remocao += cont_remove;
 
             printf("Custo de remocao: %d\n", cont_remove);
@@ -373,7 +396,10 @@ No* encontrar_minimo(Arvore *arvore, No* no) {
 }
 
 void balancear_remocao(Arvore *arvore, No *no) {
-    while (no != arvore->raiz && no != NULL && no->cor == Preto) {
+    if (no == NULL)
+        return;
+
+    while (no != arvore->raiz && no->cor == Preto) {
         if (no == no->pai->esquerda) {
             No *irmao = no->pai->direita;
 
@@ -470,11 +496,7 @@ void balancear_remocao(Arvore *arvore, No *no) {
         cont_remove++;
     }
 
-    if (no != NULL) {
-        no->cor = Preto;
-
-        cont_remove++;
-    }
+    no->cor = Preto;
 
     cont_remove++;
 }
@@ -558,15 +580,6 @@ void shuffle_num(int numeros[]) {
     for (int i = 0; i < arvore_quant; i++) {
         int troca = rand() % arvore_quant;
         int aux = numeros[i];
-        numeros[i] = numeros[troca];
-        numeros[troca] = aux;
-    }
-}
-
-void shuffle_nos(No *numeros[]) {
-    for (int i = 0; i < arvore_quant; i++) {
-        int troca = rand() % arvore_quant;
-        No *aux = numeros[i];
         numeros[i] = numeros[troca];
         numeros[troca] = aux;
     }
