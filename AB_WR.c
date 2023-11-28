@@ -25,10 +25,17 @@
     No* divideNo(ArvoreB*, No*);
     void adicionaChaveRecursivo(ArvoreB*, No*, No*, int);
     void adicionaChave(ArvoreB*, int);
-    void removerChaveRecursivo(ArvoreB* ArvoreB, No* no, int chave);
-    void removeChaveNo(No* no, int chave);
-    void rearranjaNo(ArvoreB* ArvoreB ,No* no, int indice);
-    void mergeNos(ArvoreB* ArvoreB ,No* no, int indice);
+    void removerChave(ArvoreB* ArvoreB, int chave);
+    void removeChaveNo(ArvoreB* ArvoreB, No* no, int chave);
+    void removerChaveFolha(No* no, int indice);
+    void removerChaveNaoFolha(ArvoreB* ArvoreB, No* no, int indice);
+    No* obterSucessor(ArvoreB* ArvoreB, No* no, int indice);
+    void rearranjaNo(ArvoreB* ArvoreB, No* no, int indice);
+    int tentarRedistribuirDireita(ArvoreB* ArvoreB, No* no, int indice, No* filhoEsquerda, No* filhoDireita);
+    int tentarRedistribuirEsquerda(ArvoreB* ArvoreB, No* no, int indice, No* filhoEsquerda, No* filhoDireita);
+    void redistribuirDireita(No* no, int indice, No* filhoEsquerda, No* filhoDireita);
+    void redistribuirEsquerda(No* no, int indice, No* filhoEsquerda, No* filhoDireita);
+    void mergeNos(ArvoreB* ArvoreB, No* no, int indice);
 
     ArvoreB* criaArvore(int ordem) {
         ArvoreB* a = malloc(sizeof(ArvoreB));
@@ -82,10 +89,8 @@
                 cont++;
                 return meio; //encontrou	
             } else if (no->chaves[meio] > chave) {
-                cont++;
-                    fim	= meio - 1;	
+                fim	= meio - 1;	
             } else {
-                cont++;
                 inicio = meio + 1;
             }
         }
@@ -103,7 +108,6 @@
                 cont++;
                 return 1; //encontrou
             } else {
-                cont++;
                 no = no->filhos[i];
             }
         }
@@ -122,7 +126,6 @@
 {                cont++;
                 return no;} //encontrou nó
             else{
-                cont++;
                 no = no->filhos[i];
             }
         }
@@ -138,6 +141,7 @@
         for (int j = no->total - 1; j >= i; j--) {
             no->chaves[j + 1] = no->chaves[j];
             no->filhos[j + 2] = no->filhos[j + 1];
+            cont++;
         }
         
         no->chaves[i] = chave;
@@ -194,7 +198,6 @@
                 novo->pai = pai;
                 ArvoreB->raiz = pai;
             } else{
-            cont++;
                 adicionaChaveRecursivo(ArvoreB, no->pai, novo, promovido);
             }
         }
@@ -205,14 +208,9 @@
 
         adicionaChaveRecursivo(ArvoreB, no, NULL, chave);
     }
-
- void removerChave(ArvoreB* ArvoreB, int chave) {
-    No* no = localizaNo(ArvoreB, chave);
-    removerChaveRecursivo(ArvoreB, no, chave);
-}
-void removeChaveNo(No* no, int chave) {
+void removeChaveNo(ArvoreB* ArvoreB,No* no, int chave) {
     // Encontra a posição da chave a ser removida
-    int indice = pesquisaBinaria(no, chave);
+    int indice = pesquisaBinaria(no, chave); 
     //printf("Chave: %d, Índice: %d, Total: %d\n", chave, indice, no->total);
 
     // Se a chave está presente no nó
@@ -243,14 +241,14 @@ void removeChaveNo(No* no, int chave) {
 
             // Substitui a chave pelo sucessor
             no->chaves[indice] = sucessor->chaves[0];
-
             // Chama a função recursivamente para remover o sucessor
-            removeChaveNo(sucessor, sucessor->chaves[0]);
+            removeChaveNo(ArvoreB,sucessor, sucessor->chaves[0]);
+            rearranjaNo(ArvoreB,no,chave);
         }
     } else if (no->filhos[indice] != NULL) {
         cont++;
         // Se a chave não está no nó, mas o filho correspondente pode conter a chave
-        removeChaveNo(no->filhos[indice], chave);
+        removeChaveNo(ArvoreB,no->filhos[indice], chave);
     } else {
         cont++;
         // Chave não encontrada na árvore
@@ -268,7 +266,7 @@ void removerChaveRecursivo(ArvoreB* ArvoreB, No* no, int chave) {
 
     if (indice < no->total && no->chaves[indice] == chave) {
         cont+=2;
-        removeChaveNo(no, chave);
+        removeChaveNo(ArvoreB,no, chave);
     } else if (no->filhos[indice] != NULL) {
         cont++;
         removerChaveRecursivo(ArvoreB, no->filhos[indice], chave);
@@ -362,6 +360,10 @@ void mergeNos(ArvoreB* ArvoreB ,No* no, int indice) {
     // Libera a memória do filho direito
     free(filhoDireita);
 }
+ void removerChave(ArvoreB* ArvoreB, int chave) {
+    No* no = localizaNo(ArvoreB, chave);
+    removerChaveRecursivo(ArvoreB, no, chave);
+}
     int isThere(int *vet,int size,int key){
     for(int i = 0;i<size;i++){
         if(vet[i] == key){
@@ -375,9 +377,9 @@ void avgcase1() {
     FILE* fp = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB1_Insercao.txt", "w+");
     FILE* fp2 = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB1_remocao.txt", "w+");
     srand(time(NULL));
-    double insetions[100];
-    double deletions[100];
-    for (int j = 0; j < 10; j += 1) {
+    double insetions[100] = {0};
+    double deletions[100] = {0};
+    for (int j = 0; j < 100; j += 1) {
         float delete = 0;
         float insertion = 0;
         float stopers = 100;
@@ -389,12 +391,12 @@ void avgcase1() {
         // Inserir 100 chaves aleatórias
         while (k < 10000)
         {
-            cont++;
-            int key = rand() %10000;
+            int key = rand();
             if(isThere(vet,k,key)){
+                cont = 0;
                 adicionaChave(a, key);
                 cont++;
-                insertion += cont;
+                insertion = cont;
                 vet[k] = key;
                 k++;
                 if(k == stopers ){
@@ -405,12 +407,14 @@ void avgcase1() {
                 cont = 0;
             }
         }
+        cont = 0;
         stopers = 100;
         // Randomly delete key
-        for (int i = 0; i<=10000; i += 1) {
+        for (int i = 0; i<=10000; i += 100) {
             int index = vet[i];
             removerChave(a, index);
-            delete += cont;
+            cont++;
+            delete = cont;
             if(i == stopers ){
                 deletions[n] += delete;
                 n++;
@@ -421,8 +425,8 @@ void avgcase1() {
         free(a);
     }
     for(int i =0;i<100;i++){
-        fprintf(fp,"%d %lf\n",(i+1)*100,insetions[i]/(10));
-        fprintf(fp2,"%d %lf\n",(i+1)*100,deletions[i]/(10));
+        fprintf(fp,"%d %lf\n",(i+1)*100,insetions[i]/(100));
+        fprintf(fp2,"%d %lf\n",(i+1)*100,deletions[i]/(100));
     }
     fclose(fp);
     fclose(fp2);
@@ -431,9 +435,9 @@ void avgcase5() {
     FILE* fp = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB2_Insercao.txt", "w+");
     FILE* fp2 = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB2_remocao.txt", "w+");
     srand(time(NULL));
-    double insetions[100];
-    double deletions[100];
-    for (int j = 0; j < 10; j += 1) {
+    double insetions[100] = {0};
+    double deletions[100] = {0};
+    for (int j = 0; j < 100; j += 1) {
         float delete = 0;
         float insertion = 0;
         float stopers = 100;
@@ -445,12 +449,12 @@ void avgcase5() {
         // Inserir 100 chaves aleatórias
         while (k < 10000)
         {
-            cont++;
-            int key = rand() %10000;
+            int key = rand();
             if(isThere(vet,k,key)){
+                cont = 0;
                 adicionaChave(a, key);
                 cont++;
-                insertion += cont;
+                insertion = cont;
                 vet[k] = key;
                 k++;
                 if(k == stopers ){
@@ -461,12 +465,14 @@ void avgcase5() {
                 cont = 0;
             }
         }
+        cont = 0;
         stopers = 100;
         // Randomly delete key
-        for (int i = 0; i<=10000; i += 1) {
+        for (int i = 0; i<=10000; i += 100) {
             int index = vet[i];
             removerChave(a, index);
-            delete += cont;
+            cont++;
+            delete = cont;
             if(i == stopers ){
                 deletions[n] += delete;
                 n++;
@@ -477,8 +483,8 @@ void avgcase5() {
         free(a);
     }
     for(int i =0;i<100;i++){
-        fprintf(fp,"%d %lf\n",(i+1)*100,insetions[i]/(10));
-        fprintf(fp2,"%d %lf\n",(i+1)*100,deletions[i]/(10));
+        fprintf(fp,"%d %lf\n",(i+1)*100,insetions[i]/(100));
+        fprintf(fp2,"%d %lf\n",(i+1)*100,deletions[i]/(100));
     }
     fclose(fp);
     fclose(fp2);
@@ -487,9 +493,9 @@ void avgcase10() {
     FILE* fp = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB3_Insercao.txt", "w+");
     FILE* fp2 = fopen("C:\\Users\\leodu\\Downloads\\NEWEDA\\AB3_remocao.txt", "w+");
     srand(time(NULL));
-    double insetions[100];
-    double deletions[100];
-    for (int j = 0; j < 10; j += 1) {
+    double insetions[100] = {0};
+    double deletions[100] = {0};
+    for (int j = 0; j < 100; j += 1) {
         float delete = 0;
         float insertion = 0;
         float stopers = 100;
@@ -501,40 +507,44 @@ void avgcase10() {
         // Inserir 100 chaves aleatórias
         while (k < 10000)
         {
-            cont++;
-            int key = rand() %10000;
+            int key = rand();
             if(isThere(vet,k,key)){
+                cont = 0;
                 adicionaChave(a, key);
                 cont++;
-                insertion += cont;
+                insertion =+ cont;
                 vet[k] = key;
                 k++;
                 if(k == stopers ){
                     insetions[m] += insertion;
                     m++;
                     stopers += 100;
+                    insertion = 0;
                 }
                 cont = 0;
             }
         }
+        cont = 0;
         stopers = 100;
         // Randomly delete key
-        for (int i = 0; i<=10000; i += 1) {
+        for (int i = 0; i<=10000; i += 100) {
             int index = vet[i];
             removerChave(a, index);
-            delete += cont;
+            cont++;
+            delete =+ cont;
             if(i == stopers ){
                 deletions[n] += delete;
                 n++;
                 stopers += 100;
+                delete = 0;
             }
             cont = 0;
         }
         free(a);
     }
     for(int i =0;i<100;i++){
-        fprintf(fp,"%d %lf\n",(i+1)*100,insetions[i]/(10));
-        fprintf(fp2,"%d %lf\n",(i+1)*100,deletions[i]/(10));
+        fprintf(fp,"%d %lf\n",(i+1)*100,insetions[i]/(100));
+        fprintf(fp2,"%d %lf\n",(i+1)*100,deletions[i]/(100));
     }
     fclose(fp);
     fclose(fp2);
